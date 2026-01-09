@@ -13,14 +13,21 @@
         body { font-family: 'Inter', sans-serif; }
         @media print {
             .no-print { display: none !important; }
-            .print-only { display: block !important; }
+            .print-only { 
+                display: flex !important; 
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                height: 100vh !important;
+                width: 100vw !important;
+            }
             body { 
                 background: white !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }
             @page {
-                size: A4;
+                size: A4 portrait;
                 margin: 0;
             }
             * {

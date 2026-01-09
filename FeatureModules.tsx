@@ -1,6 +1,5 @@
 
 import React, { useState, useMemo } from 'react';
-/* Added QrCode to the list of lucide-react icon imports */
 import { HeartPulse, Printer, Download, MapPin, Phone, Mail, UserX, AlertCircle, ShieldCheck, Share2, Filter, LayoutGrid, MessageSquare, Send, CheckCircle, Fingerprint, CalendarDays, Building2, UserCircle2, QrCode, Baby, Sparkles, Scale, Info, Crosshair } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { PUSKESMAS_INFO, EDUCATION_LIST } from './constants';
@@ -194,90 +193,94 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
             </div>
           </div>
 
-          {/* PHYSICAL CARD PRINT TEMPLATE - ONLY VISIBLE DURING PRINT */}
-          <div className="print-only flex flex-col items-center gap-10 py-10 w-full bg-white">
-            {/* FRONT SIDE */}
-            <div className="w-[85.6mm] h-[54mm] bg-white border-[3px] border-slate-900 rounded-[1.5rem] relative overflow-hidden flex flex-col p-6 shadow-none">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/5 rounded-full blur-2xl -mr-10 -mt-10" />
-               <div className="flex justify-between items-start relative z-10 mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-indigo-600 p-1.5 rounded-lg text-white">
-                      <ShieldCheck size={14} />
+          {/* PHYSICAL CARD PRINT TEMPLATE - IMPROVED ALIGNMENT & CONTRAST */}
+          <div className="print-only w-full bg-white text-slate-900">
+            <div className="flex flex-col items-center gap-12">
+              {/* FRONT SIDE */}
+              <div className="w-[85.6mm] h-[54mm] bg-white border-2 border-indigo-600 rounded-[1.5rem] relative overflow-hidden flex flex-col p-6 shadow-none">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full blur-2xl -mr-10 -mt-10" />
+                 <div className="flex justify-between items-start relative z-10 mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="bg-indigo-600 p-1.5 rounded-lg text-white">
+                        <ShieldCheck size={14} />
+                      </div>
+                      <h2 className="text-[11px] font-black uppercase tracking-tighter text-indigo-900">KARTU ANC PINTAR</h2>
                     </div>
-                    <h2 className="text-[11px] font-black uppercase tracking-tighter text-slate-900">KARTU ANC PINTAR</h2>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest">Puskesmas</p>
-                    <p className="text-[7px] font-black text-indigo-600 uppercase leading-none">Pasar Minggu</p>
-                  </div>
-               </div>
-               
-               <div className="flex gap-4 items-center flex-1 relative z-10">
-                  <div className="bg-white p-2 border-[3px] border-slate-900 rounded-2xl shrink-0">
-                     <QRCode value={`ANC-${patientToDisplay.id}`} size={70} />
-                  </div>
-                  <div className="flex-1 space-y-2 min-w-0">
-                     <div className="space-y-0.5">
-                        <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest">Nama Pasien</p>
-                        <p className="text-[12px] font-black text-slate-900 uppercase truncate leading-none">{patientToDisplay.name}</p>
-                     </div>
-                     <div className="space-y-0.5">
-                        <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest">NIK / ID Pasien</p>
-                        <p className="text-[10px] font-black text-indigo-600 uppercase leading-none">{patientToDisplay.id}</p>
-                     </div>
-                     <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100">
-                        <div>
-                          <p className="text-[5px] font-black text-slate-400 uppercase">HPHT</p>
-                          <p className="text-[7px] font-black text-slate-900">{patientToDisplay.hpht || '-'}</p>
-                        </div>
-                        <div>
-                          <p className="text-[5px] font-black text-slate-400 uppercase">Gravida</p>
-                          <p className="text-[7px] font-black text-slate-900">G{patientToDisplay.pregnancyNumber} P{patientToDisplay.parityP}</p>
-                        </div>
-                     </div>
-                  </div>
-               </div>
-               
-               <div className="mt-2 pt-2 border-t border-slate-900 flex justify-between items-center relative z-10">
-                  <div className="flex items-center gap-1">
-                    <CheckCircle size={8} className="text-emerald-500" />
-                    <span className="text-[7px] font-black text-emerald-600 uppercase">Valid & Terverifikasi</span>
-                  </div>
-                  <p className="text-[6px] font-black text-slate-300 uppercase">Digital ID Security</p>
-               </div>
+                    <div className="text-right">
+                      <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest">Puskesmas</p>
+                      <p className="text-[7px] font-black text-indigo-600 uppercase leading-none">Pasar Minggu</p>
+                    </div>
+                 </div>
+                 
+                 <div className="flex gap-4 items-center flex-1 relative z-10">
+                    <div className="bg-white p-2 border-2 border-slate-900 rounded-2xl shrink-0">
+                       <QRCode value={`ANC-${patientToDisplay.id}`} size={70} />
+                    </div>
+                    <div className="flex-1 space-y-2 min-w-0">
+                       <div className="space-y-0.5">
+                          <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest">Nama Pasien</p>
+                          <p className="text-[13px] font-black text-slate-900 uppercase truncate leading-none">{patientToDisplay.name}</p>
+                       </div>
+                       <div className="space-y-0.5">
+                          <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest">NIK / ID Pasien</p>
+                          <p className="text-[10px] font-black text-indigo-600 uppercase leading-none">{patientToDisplay.id}</p>
+                       </div>
+                       <div className="grid grid-cols-2 gap-2 pt-1.5 border-t border-slate-100">
+                          <div>
+                            <p className="text-[5px] font-black text-slate-400 uppercase">HPHT</p>
+                            <p className="text-[8px] font-black text-slate-900">{patientToDisplay.hpht || '-'}</p>
+                          </div>
+                          <div>
+                            <p className="text-[5px] font-black text-slate-400 uppercase">Gravida</p>
+                            <p className="text-[8px] font-black text-slate-900">G{patientToDisplay.pregnancyNumber} P{patientToDisplay.parityP}</p>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+                 
+                 <div className="mt-2 pt-2 border-t-2 border-indigo-600 flex justify-between items-center relative z-10">
+                    <div className="flex items-center gap-1">
+                      <CheckCircle size={8} className="text-emerald-500" />
+                      <span className="text-[7px] font-black text-emerald-600 uppercase">Valid & Terverifikasi</span>
+                    </div>
+                    <p className="text-[6px] font-black text-slate-300 uppercase">Digital ID Security</p>
+                 </div>
+              </div>
+
+              {/* BACK SIDE - LIGHTENED FOR BETTER PRINTING */}
+              <div className="w-[85.6mm] h-[54mm] bg-indigo-50 border-2 border-indigo-200 rounded-[1.5rem] relative overflow-hidden flex flex-col p-6 shadow-none">
+                 <div className="absolute inset-0 bg-white/40 pointer-events-none" />
+                 
+                 <div className="mb-4 pb-3 border-b border-indigo-200 flex items-center justify-between relative z-10">
+                    <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-900">Instruksi Layanan</h3>
+                    <Phone size={14} className="text-indigo-300" />
+                 </div>
+
+                 <div className="space-y-3 flex-1 relative z-10">
+                    <div className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-1 shrink-0" />
+                      <p className="text-[8px] font-bold text-slate-700 leading-tight uppercase">Bawa kartu ini setiap melakukan pemeriksaan kehamilan (ANC) di Puskesmas atau RS.</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-1 shrink-0" />
+                      <p className="text-[8px] font-bold text-slate-700 leading-tight uppercase">Hubungi kontak darurat di nomor <b>{PUSKESMAS_INFO.phone}</b> jika terjadi tanda bahaya kehamilan.</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-1 shrink-0" />
+                      <p className="text-[8px] font-bold text-slate-700 leading-tight uppercase">Pantau status kehamilan secara mandiri melalui Aplikasi Smart ANC.</p>
+                    </div>
+                 </div>
+
+                 <div className="mt-4 pt-3 border-t border-indigo-200 text-center relative z-10">
+                    <p className="text-[8px] font-black text-indigo-900 uppercase tracking-[0.2em] mb-1">{PUSKESMAS_INFO.name}</p>
+                    <p className="text-[6px] font-bold text-indigo-400 uppercase italic">Digital Health Persistence v4.3</p>
+                 </div>
+              </div>
+              
+              <div className="text-center opacity-40 border-t border-dashed border-slate-200 pt-6 w-full">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Panduan: Gunting sesuai garis tepi kartu fisik.</p>
+              </div>
             </div>
-
-            {/* BACK SIDE */}
-            <div className="w-[85.6mm] h-[54mm] bg-slate-900 text-white rounded-[1.5rem] relative overflow-hidden flex flex-col p-6 shadow-none">
-               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent pointer-events-none" />
-               
-               <div className="mb-4 pb-3 border-b border-white/10 flex items-center justify-between">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Instruksi Layanan</h3>
-                  <Phone size={14} className="text-white/40" />
-               </div>
-
-               <div className="space-y-3 flex-1">
-                  <div className="flex items-start gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1 shrink-0" />
-                    <p className="text-[8px] font-bold text-slate-300 leading-tight uppercase">Bawa kartu ini setiap melakukan pemeriksaan kehamilan (ANC) di Puskesmas atau RS.</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1 shrink-0" />
-                    <p className="text-[8px] font-bold text-slate-300 leading-tight uppercase">Hubungi kontak darurat di nomor <b>{PUSKESMAS_INFO.phone}</b> jika terjadi tanda bahaya kehamilan.</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1 shrink-0" />
-                    <p className="text-[8px] font-bold text-slate-300 leading-tight uppercase">Pantau status kehamilan secara mandiri melalui Aplikasi Smart ANC.</p>
-                  </div>
-               </div>
-
-               <div className="mt-4 pt-4 border-t border-white/10 text-center">
-                  <p className="text-[7px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-1">{PUSKESMAS_INFO.name}</p>
-                  <p className="text-[6px] font-medium text-slate-500 uppercase italic">Terima kasih atas kepercayaan Anda kepada layanan kami.</p>
-               </div>
-            </div>
-            
-            <p className="text-[10px] font-black text-slate-300 uppercase mt-4">Panduan: Gunting sesuai garis tepi kartu fisik.</p>
           </div>
 
           {/* Action Buttons */}
@@ -294,7 +297,7 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
           </div>
         </div>
       ) : (
-        <div className="bg-white p-24 rounded-[4rem] shadow-sm border border-slate-100 text-center space-y-6">
+        <div className="bg-white p-24 rounded-[4rem] shadow-sm border border-slate-100 text-center space-y-6 no-print">
           <div className="bg-slate-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto text-slate-200 shadow-inner">
             <QrCode size={48} />
           </div>
