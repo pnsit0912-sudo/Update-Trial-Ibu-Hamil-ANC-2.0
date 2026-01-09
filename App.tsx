@@ -153,6 +153,19 @@ export default function App() {
     showNotification(`Data kelahiran berhasil dicatat. Klasifikasi Bayi: ${classification}`);
   };
 
+  const handleDeleteDelivery = useCallback((patientId: string, deliveryId: string) => {
+    if (!window.confirm('Hapus permanen riwayat kelahiran ini?')) return;
+    setState(prev => ({
+      ...prev,
+      users: prev.users.map(u => u.id === patientId ? {
+        ...u,
+        pregnancyHistory: (u.pregnancyHistory || []).filter(h => h.id !== deliveryId)
+      } : u)
+    }));
+    addLog('DELETE_DELIVERY', 'PATIENT', `Menghapus riwayat kelahiran ID: ${deliveryId}`);
+    showNotification('Riwayat kelahiran berhasil dihapus');
+  }, [addLog, showNotification]);
+
   const handleNewPregnancySubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!startingNewPregnancy || !currentUser) return;
@@ -166,7 +179,6 @@ export default function App() {
       users: prev.users.map(u => {
         if (u.id === startingNewPregnancy.id) {
           const history = u.pregnancyHistory || [];
-          // Ensure current delivery data is in history before clearing it for the new pregnancy
           if (u.deliveryData && !history.some(h => h.id === u.deliveryData?.id)) {
             history.push(u.deliveryData);
           }
@@ -178,7 +190,7 @@ export default function App() {
             deliveryData: undefined,
             pregnancyHistory: history,
             pregnancyNumber: u.pregnancyNumber + 1,
-            parityP: u.parityP + 1, // Menambah jumlah persalinan sukses
+            parityP: u.parityP + 1,
             pregnancyMonth: progress?.months || 0,
           };
         }
@@ -377,7 +389,6 @@ export default function App() {
     const patients = useMemo(() => state.users.filter(u => u.role === UserRole.USER), [state.users]);
     const today = new Date().toISOString().split('T')[0];
 
-    // Dashboard Khusus Ibu Hamil (USER)
     if (currentUser?.role === UserRole.USER) {
       const progress = calculatePregnancyProgress(currentUser.hpht);
       const babySize = getBabySizeByWeek(progress?.weeks || 0);
@@ -675,7 +686,6 @@ export default function App() {
             <PatientList users={state.users} visits={state.ancVisits} onEdit={(u) => { setEditingPatient(u); setTempRiskFactors(u.selectedRiskFactors); setView('register'); }} onAddVisit={(u) => { setIsAddingVisit(u); setVisitPreviewData({ bloodPressure: '120/80', dangerSigns: [], fetalMovement: 'Normal', djj: 140 }); }} onViewProfile={(id) => setViewingPatientProfile(id)} onDeletePatient={(id) => { if(window.confirm('Hapus permanen?')) setState(prev => ({...prev, users: prev.users.filter(u => u.id !== id)})) }} onDeleteVisit={handleDeleteVisit} onToggleVisitStatus={() => {}} onRecordDelivery={(u) => setRecordingDelivery(u)} onStartNewPregnancy={(u) => setStartingNewPregnancy(u)} currentUserRole={currentUser.role} searchFilter={patientSearch} />
           )}
 
-          {/* Modal Catat Kelahiran */}
           {recordingDelivery && (
             <div className="fixed inset-0 z-[120] bg-indigo-950/90 backdrop-blur-2xl flex items-center justify-center p-4">
               <div className="bg-white w-full max-w-3xl rounded-[3rem] shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
@@ -745,7 +755,6 @@ export default function App() {
             </div>
           )}
 
-          {/* Modal Mulai Kehamilan Baru */}
           {startingNewPregnancy && (
             <div className="fixed inset-0 z-[120] bg-slate-950/90 backdrop-blur-2xl flex items-center justify-center p-4">
               <div className="bg-white w-full max-w-xl rounded-[3rem] shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
@@ -827,7 +836,20 @@ export default function App() {
           {view === 'contact' && <ContactModule />}
           {viewingPatientProfile && (
             <div className="fixed inset-0 z-[110] bg-indigo-950/90 backdrop-blur-3xl flex items-start justify-center p-2 md:p-12 overflow-y-auto pt-10 pb-10">
-              <div className="bg-gray-50 w-full max-w-7xl rounded-[4.5rem] shadow-2xl relative border-4 border-indigo-500/20 my-auto"><PatientProfileView patient={state.users.find(u => u.id === viewingPatientProfile)!} visits={state.ancVisits} onClose={() => setViewingPatientProfile(null)} onEditVisit={(v) => { setEditingVisit({patient: state.users.find(u => u.id === viewingPatientProfile)!, visit: v}); setVisitPreviewData({bloodPressure: v.bloodPressure, djj: v.djj, fetalMovement: v.fetalMovement, dangerSigns: v.dangerSigns}); }} onDeleteVisit={handleDeleteVisit} isStaff={currentUser.role !== UserRole.USER} /></div>
+              <div className="bg-gray-50 w-full max-w-7xl rounded-[4.5rem] shadow-2xl relative border-4 border-indigo-500/20 my-auto">
+                <PatientProfileView 
+                  patient={state.users.find(u => u.id === viewingPatientProfile)!} 
+                  visits={state.ancVisits} 
+                  onClose={() => setViewingPatientProfile(null)} 
+                  onEditVisit={(v) => { 
+                    setEditingVisit({patient: state.users.find(u => u.id === viewingPatientProfile)!, visit: v}); 
+                    setVisitPreviewData({bloodPressure: v.bloodPressure, djj: v.djj, fetalMovement: v.fetalMovement, dangerSigns: v.dangerSigns}); 
+                  }} 
+                  onDeleteVisit={handleDeleteVisit}
+                  onDeleteDelivery={(deliveryId) => handleDeleteDelivery(viewingPatientProfile, deliveryId)}
+                  isStaff={currentUser.role !== UserRole.USER} 
+                />
+              </div>
             </div>
           )}
         </div>

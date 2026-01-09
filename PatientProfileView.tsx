@@ -14,11 +14,13 @@ interface PatientProfileViewProps {
   onClose: () => void;
   onEditVisit?: (visit: ANCVisit) => void;
   onDeleteVisit?: (visitId: string) => void;
+  onEditDelivery?: (delivery: DeliveryData) => void;
+  onDeleteDelivery?: (deliveryId: string) => void;
   isStaff?: boolean;
 }
 
 export const PatientProfileView: React.FC<PatientProfileViewProps> = ({ 
-  patient, visits, onClose, onEditVisit, onDeleteVisit, isStaff = false 
+  patient, visits, onClose, onEditVisit, onDeleteVisit, onEditDelivery, onDeleteDelivery, isStaff = false 
 }) => {
   const [activeTab, setActiveTab] = useState<'ANC' | 'BABY'>('ANC');
   const progress = calculatePregnancyProgress(patient.hpht);
@@ -43,7 +45,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
 
       <div className="bg-white/40 backdrop-blur-xl rounded-[4rem] md:rounded-[5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border-8 border-white p-6 md:p-14 space-y-10 md:space-y-14 overflow-hidden">
         
-        {/* HEADER AREA - Matching Screenshot */}
+        {/* HEADER AREA */}
         <div className="bg-white/80 p-8 md:p-12 rounded-[3.5rem] shadow-sm border border-white flex flex-col lg:flex-row justify-between items-center gap-10 relative overflow-hidden">
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 relative z-10">
             <div className={`w-28 h-28 md:w-40 md:h-40 rounded-[2.5rem] md:rounded-[3.5rem] flex items-center justify-center text-4xl md:text-6xl font-black ${risk.color} shadow-2xl ring-8 ring-white shrink-0`}>
@@ -82,7 +84,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
         {activeTab === 'ANC' ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-14">
             
-            {/* LEFT COLUMN - STATS & DOMICILE */}
+            {/* LEFT COLUMN */}
             <div className="lg:col-span-4 space-y-8 md:space-y-12">
               <div className="bg-indigo-600 p-10 md:p-14 rounded-[3.5rem] md:rounded-[4.5rem] text-white shadow-[0_32px_64px_-16px_rgba(79,70,229,0.3)] relative overflow-hidden group">
                 <div className="flex items-center gap-4 opacity-70 mb-12">
@@ -139,9 +141,29 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                           <Calendar size={20} className="text-indigo-600" />
                           <p className="text-xl md:text-3xl font-black text-slate-900 uppercase tracking-tighter leading-none">{new Date(visit.visitDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                         </div>
-                        <div className="flex flex-wrap justify-center gap-3">
-                          <span className="px-4 py-2 bg-indigo-100 text-indigo-600 rounded-xl text-[10px] font-black uppercase shadow-sm">BB: {visit.weight}Kg</span>
-                          <span className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase shadow-lg shadow-indigo-100">TD: {visit.bloodPressure}</span>
+                        <div className="flex flex-wrap items-center gap-4">
+                          <div className="flex flex-wrap justify-center gap-3">
+                            <span className="px-4 py-2 bg-indigo-100 text-indigo-600 rounded-xl text-[10px] font-black uppercase shadow-sm">BB: {visit.weight}Kg</span>
+                            <span className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase shadow-lg shadow-indigo-100">TD: {visit.bloodPressure}</span>
+                          </div>
+                          {isStaff && (
+                            <div className="flex items-center gap-2 pl-4 border-l border-slate-200">
+                              <button 
+                                onClick={() => onEditVisit?.(visit)}
+                                className="p-3 bg-white text-indigo-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm border border-slate-100"
+                                title="Edit Kunjungan"
+                              >
+                                <Edit3 size={16} />
+                              </button>
+                              <button 
+                                onClick={() => onDeleteVisit?.(visit.id)}
+                                className="p-3 bg-white text-red-500 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm border border-slate-100"
+                                title="Hapus Kunjungan"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="p-10 md:p-14">
@@ -178,6 +200,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                        <th className="px-12 py-10 text-center">Antropometri</th>
                        <th className="px-12 py-10">Klasifikasi</th>
                        <th className="px-12 py-10">Keterangan</th>
+                       {isStaff && <th className="px-12 py-10 text-right">Aksi</th>}
                      </tr>
                    </thead>
                    <tbody className="divide-y divide-slate-50">
@@ -240,11 +263,24 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                              {baby.condition || 'No extra medical notes provided for this delivery event.'}
                            </p>
                          </td>
+                         {isStaff && (
+                           <td className="px-12 py-10 text-right">
+                             <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                               <button 
+                                 onClick={() => onDeleteDelivery?.(baby.id)}
+                                 className="p-4 bg-red-50 text-red-500 rounded-2xl hover:bg-red-600 hover:text-white transition-all shadow-sm border border-red-100"
+                                 title="Hapus Riwayat Kelahiran"
+                               >
+                                 <Trash2 size={18} />
+                               </button>
+                             </div>
+                           </td>
+                         )}
                        </tr>
                      ))}
                      {(!patient.pregnancyHistory || patient.pregnancyHistory.length === 0) && (
                        <tr>
-                         <td colSpan={6} className="py-32 text-center">
+                         <td colSpan={isStaff ? 7 : 6} className="py-32 text-center">
                            <div className="bg-slate-50 w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-8 text-slate-200 shadow-inner border border-slate-100">
                              <Baby size={64} />
                            </div>
