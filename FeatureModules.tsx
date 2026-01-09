@@ -11,7 +11,7 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
   
   return (
     <div className="max-w-2xl mx-auto space-y-12 animate-in zoom-in-95 duration-700">
-      {/* Selector untuk Nakes/Admin */}
+      {/* Selector untuk Nakes/Admin (Disembunyikan saat cetak) */}
       {!isUser && (
          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm no-print">
            <div className="flex items-center gap-4 mb-6">
@@ -38,16 +38,14 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
 
       {patientToDisplay ? (
         <div className="space-y-10">
-          {/* Main Digital Card Preview - ONLY FOR SCREEN */}
+          {/* DIGITAL PREVIEW ON SCREEN (NOT PRINTED) */}
           <div className="no-print bg-white p-10 md:p-14 rounded-[4rem] shadow-[0_48px_96px_-12px_rgba(79,70,229,0.12)] relative overflow-hidden border border-slate-100">
-            {/* Design Elements */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/5 rounded-full blur-3xl -mr-20 -mt-20" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600/5 rounded-full blur-3xl -ml-20 -mb-20" />
             
-            {/* Card Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12 relative z-10">
               <div className="flex items-center gap-5">
-                <div className="bg-indigo-600 p-4 rounded-[1.5rem] text-white shadow-xl shadow-indigo-100 rotate-3">
+                <div className="bg-indigo-600 p-4 rounded-[1.5rem] text-white shadow-xl rotate-3">
                   <ShieldCheck size={28} />
                 </div>
                 <div>
@@ -55,235 +53,141 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
                   <p className="text-[10px] font-black text-indigo-400 tracking-[0.3em] uppercase mt-2">Sistem Monitoring Terintegrasi</p>
                 </div>
               </div>
-              <div className="hidden md:block text-right">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Verifikasi Digital</p>
-                <div className="flex items-center gap-2 mt-1 justify-end">
-                  <Fingerprint size={16} className="text-indigo-600" />
-                  <span className="text-[11px] font-black text-slate-900">AUTHENTICATED</span>
-                </div>
-              </div>
             </div>
 
-            {/* Card Body Split */}
             <div className="flex flex-col lg:flex-row gap-12 relative z-10">
-              {/* QR Code Section */}
               <div className="flex flex-col items-center justify-center shrink-0">
-                <div className="bg-white p-6 border-[6px] border-slate-900 rounded-[3rem] shadow-2xl relative transition-transform hover:scale-105 duration-500">
+                <div className="bg-white p-6 border-[6px] border-slate-900 rounded-[3rem] shadow-2xl relative">
                   <QRCode value={`ANC-${patientToDisplay.id}`} size={160} />
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5">
-                    <HeartPulse size={40} className="text-indigo-600" />
-                  </div>
                 </div>
                 <div className="mt-6 bg-slate-900 text-white px-6 py-2 rounded-full text-[9px] font-black tracking-widest uppercase shadow-lg">
                   ID: {patientToDisplay.id}
                 </div>
               </div>
 
-              {/* Information Section */}
               <div className="flex-1 space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-1.5">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                      <UserCircle2 size={12} className="text-indigo-600" /> Nama Lengkap Pasien
-                    </p>
-                    <p className="text-xl font-black text-slate-900 uppercase tracking-tighter truncate">
-                      {patientToDisplay.name}
-                    </p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nama Lengkap Pasien</p>
+                    <p className="text-xl font-black text-slate-900 uppercase truncate">{patientToDisplay.name}</p>
                   </div>
                   <div className="space-y-1.5">
                     {patientToDisplay.isDelivered ? (
-                      <>
-                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
-                          <CheckCircle size={12} className="text-emerald-500" /> Status Pasien
-                        </p>
-                        <p className="text-xl font-black text-emerald-600 uppercase tracking-tighter">
-                          Pasca Salin (Nifas)
-                        </p>
-                      </>
+                      <p className="text-xl font-black text-emerald-600 uppercase">Pasca Salin (Nifas)</p>
                     ) : (
-                      <>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                          <CalendarDays size={12} className="text-indigo-600" /> Usia Kandungan
-                        </p>
-                        <p className="text-xl font-black text-slate-900 uppercase tracking-tighter">
-                          G{patientToDisplay.pregnancyNumber} | {patientToDisplay.pregnancyMonth} Bulan
-                        </p>
-                      </>
+                      <p className="text-xl font-black text-slate-900 uppercase">G{patientToDisplay.pregnancyNumber} | {patientToDisplay.pregnancyMonth} Bulan</p>
                     )}
                   </div>
                 </div>
 
-                {/* Baby Info Section (Conditional) */}
                 {patientToDisplay.isDelivered && patientToDisplay.deliveryData && (
-                  <div className="p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100 space-y-6 animate-in slide-in-from-top-4 duration-500">
-                    <div className="flex items-center gap-3 border-b border-emerald-100 pb-4">
-                      <div className="bg-white p-2.5 rounded-xl text-emerald-600 shadow-sm border border-emerald-50">
-                        <Baby size={18} />
-                      </div>
-                      <h4 className="text-[10px] font-black text-emerald-800 uppercase tracking-[0.2em]">Ringkasan Data Buah Hati</h4>
+                  <div className="p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100">
+                    <div className="flex items-center gap-3 border-b border-emerald-100 pb-4 mb-4">
+                      <Baby size={18} className="text-emerald-600" />
+                      <h4 className="text-[10px] font-black text-emerald-800 uppercase tracking-widest">Data Buah Hati</h4>
                     </div>
-                    
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-1">
-                        <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest">Nama Bayi</p>
-                        <p className="text-sm font-black text-slate-900 uppercase leading-tight truncate">
-                          {patientToDisplay.deliveryData.babyName || 'Belum Dinamai'}
-                        </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest">Nama</p>
+                        <p className="text-xs font-black text-slate-900 truncate">{patientToDisplay.deliveryData.babyName || '-'}</p>
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest">Tanggal Lahir</p>
-                        <p className="text-sm font-black text-slate-900 uppercase">
-                          {new Date(patientToDisplay.deliveryData.deliveryDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        </p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1">
-                          <Scale size={10}/> Berat Lahir
-                        </p>
-                        <p className="text-sm font-black text-slate-900 uppercase">
-                          {patientToDisplay.deliveryData.babyWeight} <span className="text-[9px] opacity-40">Gram</span>
-                        </p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest">Kondisi Bayi</p>
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          <p className="text-[10px] font-black text-emerald-700 uppercase">
-                            {patientToDisplay.deliveryData.babyStatus.replace('_', ' ')}
-                          </p>
-                        </div>
+                      <div>
+                        <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest">Berat</p>
+                        <p className="text-xs font-black text-slate-900">{patientToDisplay.deliveryData.babyWeight}g</p>
                       </div>
                     </div>
                   </div>
                 )}
-
-                <div className="p-8 bg-indigo-50/50 rounded-[2.5rem] border border-indigo-100 space-y-4">
-                  <div className="flex justify-between items-center pb-4 border-b border-indigo-100/50">
-                    <div className="flex items-center gap-3">
-                      <Building2 size={16} className="text-indigo-400" />
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Faskes Pendaftar</span>
-                    </div>
-                    <span className="font-black text-indigo-900 uppercase text-xs tracking-tight">{PUSKESMAS_INFO.name}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <Phone size={16} className="text-indigo-400" />
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Kontak Darurat</span>
-                    </div>
-                    <span className="font-black text-indigo-900 text-xs">{patientToDisplay.phone}</span>
-                  </div>
-                </div>
               </div>
-            </div>
-
-            {/* Status Footer Card */}
-            <div className="mt-12 pt-10 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center border border-emerald-100">
-                  <CheckCircle size={18} />
-                </div>
-                <div>
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Validitas Kartu</p>
-                  <p className="text-xs font-black text-emerald-600 uppercase">AKTIF & TERVALIDASI</p>
-                </div>
-              </div>
-              <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest italic">
-                *Tunjukkan kartu ini setiap melakukan kunjungan di Puskesmas
-              </p>
             </div>
           </div>
 
-          {/* PHYSICAL CARD PRINT TEMPLATE - IMPROVED ALIGNMENT & CONTRAST */}
+          {/* PHYSICAL CARD PRINT TEMPLATE - WHITE BACKGROUND ONLY */}
           <div className="print-only w-full bg-white text-slate-900">
-            <div className="flex flex-col items-center gap-12">
-              {/* FRONT SIDE */}
-              <div className="w-[85.6mm] h-[54mm] bg-white border-2 border-indigo-600 rounded-[1.5rem] relative overflow-hidden flex flex-col p-6 shadow-none">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full blur-2xl -mr-10 -mt-10" />
-                 <div className="flex justify-between items-start relative z-10 mb-4">
+            <div className="flex flex-col items-center gap-14">
+              {/* FRONT SIDE - PURE WHITE */}
+              <div className="w-[85.6mm] h-[54mm] bg-white border-[1.5pt] border-slate-900 rounded-[12pt] relative overflow-hidden flex flex-col p-5 shadow-none">
+                 <div className="flex justify-between items-start relative z-10 mb-3">
                     <div className="flex items-center gap-2">
-                      <div className="bg-indigo-600 p-1.5 rounded-lg text-white">
-                        <ShieldCheck size={14} />
-                      </div>
-                      <h2 className="text-[11px] font-black uppercase tracking-tighter text-indigo-900">KARTU ANC PINTAR</h2>
+                      <ShieldCheck size={14} className="text-slate-900" />
+                      <h2 className="text-[10pt] font-black uppercase tracking-tighter text-slate-900">KARTU ANC PINTAR</h2>
                     </div>
                     <div className="text-right">
-                      <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest">Puskesmas</p>
-                      <p className="text-[7px] font-black text-indigo-600 uppercase leading-none">Pasar Minggu</p>
+                      <p className="text-[5pt] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">Puskesmas</p>
+                      <p className="text-[6pt] font-black text-slate-900 uppercase leading-none">Pasar Minggu</p>
                     </div>
                  </div>
                  
                  <div className="flex gap-4 items-center flex-1 relative z-10">
-                    <div className="bg-white p-2 border-2 border-slate-900 rounded-2xl shrink-0">
-                       <QRCode value={`ANC-${patientToDisplay.id}`} size={70} />
+                    <div className="bg-white p-1 border-[1.5pt] border-slate-900 rounded-xl shrink-0">
+                       <QRCode value={`ANC-${patientToDisplay.id}`} size={65} />
                     </div>
                     <div className="flex-1 space-y-2 min-w-0">
                        <div className="space-y-0.5">
-                          <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest">Nama Pasien</p>
-                          <p className="text-[13px] font-black text-slate-900 uppercase truncate leading-none">{patientToDisplay.name}</p>
+                          <p className="text-[5pt] font-black text-slate-400 uppercase tracking-widest">Nama Pasien</p>
+                          <p className="text-[11pt] font-black text-slate-900 uppercase truncate leading-none">{patientToDisplay.name}</p>
                        </div>
                        <div className="space-y-0.5">
-                          <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest">NIK / ID Pasien</p>
-                          <p className="text-[10px] font-black text-indigo-600 uppercase leading-none">{patientToDisplay.id}</p>
+                          <p className="text-[5pt] font-black text-slate-400 uppercase tracking-widest">ID Pasien</p>
+                          <p className="text-[9pt] font-black text-slate-900 uppercase leading-none">{patientToDisplay.id}</p>
                        </div>
-                       <div className="grid grid-cols-2 gap-2 pt-1.5 border-t border-slate-100">
+                       <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200">
                           <div>
-                            <p className="text-[5px] font-black text-slate-400 uppercase">HPHT</p>
-                            <p className="text-[8px] font-black text-slate-900">{patientToDisplay.hpht || '-'}</p>
+                            <p className="text-[4pt] font-black text-slate-400 uppercase">HPHT</p>
+                            <p className="text-[7pt] font-black text-slate-900">{patientToDisplay.hpht || '-'}</p>
                           </div>
                           <div>
-                            <p className="text-[5px] font-black text-slate-400 uppercase">Gravida</p>
-                            <p className="text-[8px] font-black text-slate-900">G{patientToDisplay.pregnancyNumber} P{patientToDisplay.parityP}</p>
+                            <p className="text-[4pt] font-black text-slate-400 uppercase">Gravida</p>
+                            <p className="text-[7pt] font-black text-slate-900">G{patientToDisplay.pregnancyNumber} P{patientToDisplay.parityP}</p>
                           </div>
                        </div>
                     </div>
                  </div>
                  
-                 <div className="mt-2 pt-2 border-t-2 border-indigo-600 flex justify-between items-center relative z-10">
+                 <div className="mt-2 pt-1.5 border-t-[1pt] border-slate-900 flex justify-between items-center relative z-10">
                     <div className="flex items-center gap-1">
-                      <CheckCircle size={8} className="text-emerald-500" />
-                      <span className="text-[7px] font-black text-emerald-600 uppercase">Valid & Terverifikasi</span>
+                      <CheckCircle size={7} className="text-slate-900" />
+                      <span className="text-[6pt] font-black text-slate-900 uppercase tracking-tight">Valid & Terverifikasi</span>
                     </div>
-                    <p className="text-[6px] font-black text-slate-300 uppercase">Digital ID Security</p>
+                    <p className="text-[5pt] font-black text-slate-300 uppercase">Health Monitoring System</p>
                  </div>
               </div>
 
-              {/* BACK SIDE - LIGHTENED FOR BETTER PRINTING */}
-              <div className="w-[85.6mm] h-[54mm] bg-indigo-50 border-2 border-indigo-200 rounded-[1.5rem] relative overflow-hidden flex flex-col p-6 shadow-none">
-                 <div className="absolute inset-0 bg-white/40 pointer-events-none" />
-                 
-                 <div className="mb-4 pb-3 border-b border-indigo-200 flex items-center justify-between relative z-10">
-                    <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-900">Instruksi Layanan</h3>
-                    <Phone size={14} className="text-indigo-300" />
+              {/* BACK SIDE - PURE WHITE */}
+              <div className="w-[85.6mm] h-[54mm] bg-white border-[1.5pt] border-slate-900 rounded-[12pt] relative overflow-hidden flex flex-col p-5 shadow-none">
+                 <div className="mb-3 pb-2 border-b border-slate-200 flex items-center justify-between">
+                    <h3 className="text-[9pt] font-black uppercase tracking-widest text-slate-900">Instruksi Layanan</h3>
+                    <Phone size={12} className="text-slate-400" />
                  </div>
 
-                 <div className="space-y-3 flex-1 relative z-10">
-                    <div className="flex items-start gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-1 shrink-0" />
-                      <p className="text-[8px] font-bold text-slate-700 leading-tight uppercase">Bawa kartu ini setiap melakukan pemeriksaan kehamilan (ANC) di Puskesmas atau RS.</p>
+                 <div className="space-y-2.5 flex-1">
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-slate-900 mt-1 shrink-0" />
+                      <p className="text-[7.5pt] font-bold text-slate-800 leading-tight uppercase">Bawa kartu ini setiap melakukan pemeriksaan kehamilan (ANC) di Puskesmas atau RS.</p>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-1 shrink-0" />
-                      <p className="text-[8px] font-bold text-slate-700 leading-tight uppercase">Hubungi kontak darurat di nomor <b>{PUSKESMAS_INFO.phone}</b> jika terjadi tanda bahaya kehamilan.</p>
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-slate-900 mt-1 shrink-0" />
+                      <p className="text-[7.5pt] font-bold text-slate-800 leading-tight uppercase">Hubungi kontak darurat di nomor <b>{PUSKESMAS_INFO.phone}</b> jika terjadi tanda bahaya kehamilan.</p>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-1 shrink-0" />
-                      <p className="text-[8px] font-bold text-slate-700 leading-tight uppercase">Pantau status kehamilan secara mandiri melalui Aplikasi Smart ANC.</p>
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-slate-900 mt-1 shrink-0" />
+                      <p className="text-[7.5pt] font-bold text-slate-800 leading-tight uppercase">Pantau status kehamilan melalui Aplikasi Smart ANC.</p>
                     </div>
                  </div>
 
-                 <div className="mt-4 pt-3 border-t border-indigo-200 text-center relative z-10">
-                    <p className="text-[8px] font-black text-indigo-900 uppercase tracking-[0.2em] mb-1">{PUSKESMAS_INFO.name}</p>
-                    <p className="text-[6px] font-bold text-indigo-400 uppercase italic">Digital Health Persistence v4.3</p>
+                 <div className="mt-3 pt-2 border-t border-slate-200 text-center">
+                    <p className="text-[7.5pt] font-black text-slate-900 uppercase tracking-[0.1em] mb-0.5">{PUSKESMAS_INFO.name}</p>
+                    <p className="text-[5pt] font-bold text-slate-400 uppercase italic">Terima kasih atas kunjungan Anda.</p>
                  </div>
               </div>
               
-              <div className="text-center opacity-40 border-t border-dashed border-slate-200 pt-6 w-full">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Panduan: Gunting sesuai garis tepi kartu fisik.</p>
+              <div className="text-center pt-8 border-t border-dashed border-slate-100 w-full">
+                <p className="text-[9pt] font-black text-slate-300 uppercase tracking-widest">Gunting tepat di garis tepi kartu.</p>
               </div>
             </div>
           </div>
 
-          {/* Action Buttons */}
+          {/* Action Buttons (Hidden when printing) */}
           <div className="flex flex-col sm:flex-row gap-4 no-print px-4">
             <button 
               onClick={() => window.print()} 
@@ -347,7 +251,6 @@ export const EducationModule = () => {
 
   return (
     <div className="space-y-12 animate-in fade-in duration-700">
-      {/* Filter Bar */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white p-8 rounded-[3rem] shadow-sm border border-gray-100">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-lg">
@@ -376,7 +279,6 @@ export const EducationModule = () => {
         </div>
       </div>
 
-      {/* Content Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
         {filteredEducation.map(edu => (
           <div 
@@ -386,14 +288,6 @@ export const EducationModule = () => {
             <div className="h-64 overflow-hidden relative">
               <img src={edu.thumbnail} className="w-full h-full object-cover group-hover:scale-110 transition duration-1000" alt={edu.title} />
               <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/80 to-transparent opacity-60" />
-              <div className="absolute bottom-6 left-6 flex gap-2">
-                <span className="px-4 py-1.5 bg-white text-indigo-900 text-[9px] font-black rounded-full uppercase tracking-widest shadow-lg">
-                  {edu.category}
-                </span>
-                <span className="px-4 py-1.5 bg-white/20 backdrop-blur-xl text-white text-[9px] font-black rounded-full uppercase tracking-widest border border-white/30">
-                  {edu.type}
-                </span>
-              </div>
             </div>
             <div className="p-10">
               <h4 className="text-2xl font-black text-gray-900 mb-4 leading-tight tracking-tighter">{edu.title}</h4>
@@ -418,12 +312,6 @@ export const EducationModule = () => {
             </div>
           </div>
         ))}
-        {filteredEducation.length === 0 && (
-          <div className="col-span-full py-24 text-center">
-            <LayoutGrid size={48} className="mx-auto text-gray-100 mb-4" />
-            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Belum ada materi untuk kategori ini</p>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -437,11 +325,9 @@ export const ContactModule = () => {
   const handleFeedbackSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulasi pengiriman data
     setTimeout(() => {
       setIsSubmitting(false);
       setSubmitted(true);
-      // Reset state setelah beberapa detik agar form muncul kembali jika dibutuhkan
       setTimeout(() => setSubmitted(false), 5000);
     }, 1500);
   };
@@ -454,7 +340,6 @@ export const ContactModule = () => {
         <a href={`tel:${PUSKESMAS_INFO.phone}`} className="inline-flex items-center gap-4 px-8 md:px-12 py-4 md:py-6 bg-white text-red-600 rounded-full font-black text-lg md:text-xl shadow-2xl hover:scale-105 transition-all">
           <Phone size={28} /> {PUSKESMAS_INFO.phone}
         </a>
-        <div className="absolute -right-20 -top-20 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
@@ -469,93 +354,6 @@ export const ContactModule = () => {
             <p className="text-xs text-gray-400 font-medium leading-relaxed">{card.detail}</p>
           </div>
         ))}
-      </div>
-
-      {/* Formulir Feedback Baru */}
-      <div className="bg-white p-10 md:p-16 rounded-[4rem] shadow-sm border border-gray-100 relative overflow-hidden">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
-          <div className="flex items-center gap-6">
-            <div className="bg-indigo-600 p-5 rounded-[2rem] text-white shadow-xl">
-              <MessageSquare size={32} />
-            </div>
-            <div>
-              <h3 className="text-3xl font-black text-gray-900 uppercase tracking-tighter leading-none">Masukan & Saran</h3>
-              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mt-2">Bantu kami meningkatkan layanan Smart ANC</p>
-            </div>
-          </div>
-        </div>
-
-        {submitted ? (
-          <div className="py-20 text-center animate-in zoom-in duration-500">
-            <div className="bg-indigo-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 text-indigo-600">
-              <CheckCircle size={48} />
-            </div>
-            <h4 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Terima Kasih!</h4>
-            <p className="text-gray-500 font-bold mt-2">Masukan Anda telah kami terima dan akan segera ditindaklanjuti.</p>
-          </div>
-        ) : (
-          <form onSubmit={handleFeedbackSubmit} className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-6">Nama Lengkap</label>
-                <input 
-                  type="text" 
-                  name="name" 
-                  placeholder="Masukkan nama Anda" 
-                  className="w-full px-8 py-5 bg-gray-50 border-none rounded-[2rem] font-bold outline-none focus:ring-4 focus:ring-indigo-100 transition-all" 
-                  required 
-                />
-              </div>
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-6">Kontrol (Email / WA)</label>
-                <input 
-                  type="text" 
-                  name="contact" 
-                  placeholder="Email atau No. WhatsApp" 
-                  className="w-full px-8 py-5 bg-gray-50 border-none rounded-[2rem] font-bold outline-none focus:ring-4 focus:ring-indigo-100 transition-all" 
-                  required 
-                />
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-6">Kategori Masukan</label>
-              <select 
-                name="category" 
-                className="w-full px-8 py-5 bg-gray-50 border-none rounded-[2rem] font-black text-xs outline-none focus:ring-4 focus:ring-indigo-100" 
-                required
-              >
-                <option value="SUGGESTION">SARAN PERBAIKAN FITUR</option>
-                <option value="BUG">LAPORAN BUG / KENDALA SISTEM</option>
-                <option value="QUESTION">PERTANYAAN UMUM</option>
-                <option value="OTHER">LAINNYA</option>
-              </select>
-            </div>
-
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-6">Pesan Masukan</label>
-              <textarea 
-                name="message" 
-                rows={5} 
-                placeholder="Tuliskan masukan atau laporan Anda di sini..." 
-                className="w-full px-8 py-6 bg-gray-50 border-none rounded-[2.5rem] font-bold outline-none focus:ring-4 focus:ring-indigo-100 transition-all" 
-                required
-              ></textarea>
-            </div>
-
-            <button 
-              type="submit" 
-              disabled={isSubmitting}
-              className={`w-full py-6 rounded-[2.5rem] font-black uppercase text-xs tracking-widest shadow-xl transition-all flex items-center justify-center gap-3 active:scale-95 ${
-                isSubmitting 
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                  : 'bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-indigo-200'
-              }`}
-            >
-              {isSubmitting ? 'Mengirim...' : <><Send size={18} /> Kirim Masukan Sekarang</>}
-            </button>
-          </form>
-        )}
       </div>
     </div>
   );

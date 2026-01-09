@@ -12,7 +12,10 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         @media print {
+            /* Sembunyikan semua elemen UI */
             .no-print { display: none !important; }
+            
+            /* Tampilkan area cetak dan paksa rata tengah */
             .print-only { 
                 display: flex !important; 
                 flex-direction: column !important;
@@ -20,21 +23,29 @@
                 justify-content: center !important;
                 height: 100vh !important;
                 width: 100vw !important;
+                background: white !important;
             }
+            
             body { 
                 background: white !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }
+            
             @page {
                 size: A4 portrait;
                 margin: 0;
             }
+            
+            /* Paksa printer untuk mencetak warna latar jika ada (meskipun kita set ke putih) */
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+                box-shadow: none !important;
+                text-shadow: none !important;
             }
         }
+        
         .print-only { display: none; }
         #map-container { height: 500px; width: 100%; border-radius: 0.75rem; z-index: 10; }
         .custom-div-icon { background: none; border: none; }
