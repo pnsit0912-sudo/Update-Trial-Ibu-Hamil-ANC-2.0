@@ -97,7 +97,7 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
           <div className="print-only">
             <div className="flex flex-col items-center w-full bg-white">
               
-              <div className="w-full text-center mb-10 border-b-2 border-black pb-4">
+              <div className="w-full text-center mb-10 border-b-2 border-white pb-4">
                  <h2 className="text-xl font-black uppercase" style={{ color: CARD_COLORS.text }}>Dokumen Kartu Kesehatan Digital</h2>
                  <p className="text-xs font-bold uppercase" style={{ color: CARD_COLORS.text }}>{PUSKESMAS_INFO.name}</p>
               </div>
