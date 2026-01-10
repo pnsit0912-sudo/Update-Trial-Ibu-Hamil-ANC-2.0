@@ -12,56 +12,54 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         
+        /* ATURAN KHUSUS PENCETAKAN */
         @media print {
-            /* 1. Reset Dasar Cetak */
-            html, body {
-                background: #ffffff !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                width: 100%;
-                height: auto !important;
-            }
-
-            /* 2. Sembunyikan semua UI aplikasi */
-            .no-print, header, aside, nav, button, .notification-area { 
+            /* Sembunyikan elemen UI aplikasi */
+            .no-print, header, aside, nav, button, .notification-area, #root > main > header { 
                 display: none !important; 
             }
             
-            /* 3. Tampilkan hanya template kartu */
-            .print-only { 
-                display: block !important; 
-                visibility: visible !important;
-                width: 100% !important;
+            /* Reset dasar body saat cetak */
+            html, body {
+                background: white !important;
                 margin: 0 !important;
-                padding: 20mm 0 !important; /* Margin atas bawah agar rapi di kertas A4 */
+                padding: 0 !important;
+                height: 99% !important; /* Mencegah trigger halaman baru */
+                overflow: hidden !important;
             }
 
-            .card-container {
-                page-break-inside: avoid;
-                break-inside: avoid;
-                margin-bottom: 20px;
+            /* Tampilkan area kartu */
+            .print-only { 
+                display: flex !important; 
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: flex-start !important;
+                width: 100% !important;
+                padding-top: 15mm !important;
+            }
+
+            /* Pastikan satu kartu tidak terpotong */
+            .card-to-print {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                margin-bottom: 30px !important;
+                display: block !important;
             }
             
             @page {
                 size: A4 portrait;
-                margin: 10mm;
+                margin: 0; /* Margin diatur di kontainer internal */
             }
             
-            /* 4. Pastikan warna dan border tercetak */
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-            
-            .print-only p, .print-only span, .print-only h2, .print-only h3 {
-                color: #000000 !important;
-            }
         }
         
-        /* Default state di layar browser */
+        /* Tampilan di layar browser */
         .print-only { display: none; }
         #map-container { height: 500px; width: 100%; border-radius: 0.75rem; z-index: 10; }
-        .custom-div-icon { background: none; border: none; }
         html { scroll-behavior: smooth; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

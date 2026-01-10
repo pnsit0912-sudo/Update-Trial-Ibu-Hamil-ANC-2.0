@@ -9,20 +9,17 @@ import { User, AppState, EducationContent } from './types';
 export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppState, setState: any, isUser: boolean, user: User }) => {
   const patientToDisplay = isUser ? user : state.users.find(u => u.id === state.selectedPatientId);
   
-  // URL Lengkap untuk QR Code: Saat discan otomatis membuka profil pasien
   const getQrValue = (pid: string) => {
-    // Menggunakan origin aplikasi saat ini + parameter pid
     return `${window.location.origin}${window.location.pathname}?pid=${pid}`;
   };
 
   const handleSaveCard = () => {
-    // Memanggil fungsi cetak browser (User bisa pilih Save as PDF untuk menyimpan di HP/Laptop)
     window.print();
   };
 
   return (
     <div className="max-w-2xl mx-auto space-y-12 animate-in zoom-in-95 duration-700">
-      {/* Selector Pasien (Hanya untuk Staff) */}
+      {/* SELEKTOR PASIEN (Hanya muncul di layar) */}
       {!isUser && (
          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm no-print">
            <div className="flex items-center gap-4 mb-6">
@@ -31,7 +28,7 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
              </div>
              <div>
                 <h3 className="text-sm font-black text-slate-900 uppercase tracking-tighter">Pilih Pasien</h3>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Generate Kartu Digital</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Pilih data untuk dicetak</p>
              </div>
            </div>
            <select 
@@ -49,123 +46,128 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
 
       {patientToDisplay ? (
         <div className="space-y-10">
-          {/* DIGITAL PREVIEW DI LAYAR */}
-          <div className="no-print bg-white p-10 md:p-14 rounded-[4rem] shadow-[0_48px_96px_-12px_rgba(79,70,229,0.12)] relative overflow-hidden border border-slate-100">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/5 rounded-full blur-3xl -mr-20 -mt-20" />
-            
+          {/* PREVIEW LAYAR (No-Print) */}
+          <div className="no-print bg-white p-10 md:p-14 rounded-[4rem] shadow-2xl relative overflow-hidden border border-slate-100">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12 relative z-10">
               <div className="flex items-center gap-5">
                 <div className="bg-indigo-600 p-4 rounded-[1.5rem] text-white shadow-xl rotate-3">
                   <ShieldCheck size={28} />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">KARTU ANC PINTAR</h1>
-                  <p className="text-[10px] font-black text-indigo-400 tracking-[0.3em] uppercase mt-2">Sistem Monitoring Terintegrasi</p>
+                  <h1 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">KARTU ANC PINTAR</h1>
+                  <p className="text-[10px] font-black text-indigo-400 tracking-[0.3em] uppercase mt-2">Versi Digital Aktif</p>
                 </div>
               </div>
             </div>
 
             <div className="flex flex-col lg:flex-row gap-12 relative z-10">
-              <div className="flex flex-col items-center justify-center shrink-0">
-                <div className="bg-white p-6 border-[6px] border-slate-900 rounded-[3rem] shadow-2xl relative">
-                  <QRCode value={getQrValue(patientToDisplay.id)} size={160} />
-                </div>
-                <div className="mt-6 bg-slate-900 text-white px-6 py-2 rounded-full text-[9px] font-black tracking-widest uppercase shadow-lg">
-                  ID: {patientToDisplay.id}
+              <div className="flex flex-col items-center shrink-0">
+                <div className="bg-white p-6 border-[6px] border-slate-900 rounded-[3rem] shadow-xl">
+                  <QRCode value={getQrValue(patientToDisplay.id)} size={150} />
                 </div>
               </div>
-
-              <div className="flex-1 space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-1.5">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nama Lengkap Pasien</p>
-                    <p className="text-xl font-black text-slate-900 uppercase truncate">{patientToDisplay.name}</p>
-                  </div>
-                  <div className="space-y-1.5">
-                    <p className="text-xl font-black text-slate-900 uppercase">
-                      {patientToDisplay.isDelivered ? 'Pasca Salin' : `G${patientToDisplay.pregnancyNumber} | ${patientToDisplay.pregnancyMonth} Bln`}
-                    </p>
-                  </div>
+              <div className="flex-1 space-y-6">
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Identitas Pasien</p>
+                  <p className="text-2xl font-black text-slate-900 uppercase">{patientToDisplay.name}</p>
+                  <p className="text-sm font-bold text-indigo-600 mt-1">ID: {patientToDisplay.id}</p>
+                </div>
+                <div className="pt-6 border-t border-slate-100">
+                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status Saat Ini</p>
+                   <p className="text-lg font-black text-slate-700 uppercase">
+                      {patientToDisplay.isDelivered ? 'Pasca Salin (Nifas)' : 'Sedang Hamil (ANC)'}
+                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* TEMPLATE KHUSUS CETAK - DIPERBAIKI AGAR TIDAK BLANK */}
+          {/* ========================================================================= */}
+          /* TEMPLATE CETAK (Hanya muncul saat CTRL+P atau tombol Simpan diklik)      */
+          /* EDIT AREA DI BAWAH INI UNTUK MENGUBAH TAMPILAN HASIL DOWNLOAD/PRINT     */
+          {/* ========================================================================= */}
           <div className="print-only">
-            <div className="flex flex-col items-center gap-12 w-full">
-              {/* SISI DEPAN KARTU */}
-              <div className="card-container w-[85.6mm] h-[54mm] bg-white border-[2pt] border-black rounded-[12pt] flex flex-col p-6 relative overflow-hidden">
-                 <div className="flex justify-between items-start mb-3">
+            <div className="flex flex-col items-center w-full">
+              
+              {/* HEADER HALAMAN CETAK (Opsional) */}
+              <div className="w-full text-center mb-10 border-b-2 border-black pb-4">
+                 <h2 className="text-xl font-black uppercase">Dokumen Kartu Kesehatan Digital</h2>
+                 <p className="text-xs font-bold uppercase">{PUSKESMAS_INFO.name}</p>
+              </div>
+
+              {/* SISI DEPAN KARTU - Edit style di sini */}
+              <div className="card-to-print w-[85.6mm] h-[54mm] bg-white border-[2.5pt] border-black rounded-[15pt] p-6 relative overflow-hidden mb-12">
+                 <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-2">
-                      <ShieldCheck size={16} className="text-black" />
-                      <h2 className="text-[11pt] font-black uppercase tracking-tighter">KARTU ANC PINTAR</h2>
+                      <ShieldCheck size={18} className="text-black" />
+                      <h2 className="text-[12pt] font-black uppercase tracking-tighter">KARTU ANC PINTAR</h2>
                     </div>
                     <div className="text-right">
-                      <p className="text-[6pt] font-black text-gray-500 uppercase leading-none">Puskesmas</p>
-                      <p className="text-[7pt] font-black text-black uppercase">Pasar Minggu</p>
+                      <p className="text-[7pt] font-black text-black uppercase leading-none">PASAR MINGGU</p>
                     </div>
                  </div>
                  
-                 <div className="flex gap-5 items-center flex-1">
-                    <div className="bg-white p-1 border-[1.5pt] border-black rounded-xl">
+                 <div className="flex gap-6 items-center">
+                    {/* Barcode Area */}
+                    <div className="bg-white p-1 border-[1.5pt] border-black rounded-lg">
                        <QRCode value={getQrValue(patientToDisplay.id)} size={75} fgColor="#000000" />
                     </div>
-                    <div className="flex-1 space-y-2">
+                    {/* Info Area */}
+                    <div className="flex-1 space-y-3">
                        <div>
-                          <p className="text-[6pt] font-black text-gray-400 uppercase tracking-widest">Nama Pasien</p>
-                          <p className="text-[11pt] font-black text-black uppercase leading-tight truncate">{patientToDisplay.name}</p>
+                          <p className="text-[6pt] font-black text-gray-500 uppercase">Nama Pasien</p>
+                          <p className="text-[11pt] font-black text-black uppercase truncate leading-none">{patientToDisplay.name}</p>
                        </div>
                        <div>
-                          <p className="text-[6pt] font-black text-gray-400 uppercase tracking-widest">ID Pasien</p>
-                          <p className="text-[10pt] font-black text-black">{patientToDisplay.id}</p>
+                          <p className="text-[6pt] font-black text-gray-500 uppercase">ID Sistem</p>
+                          <p className="text-[10pt] font-black text-black leading-none">{patientToDisplay.id}</p>
                        </div>
                     </div>
                  </div>
                  
-                 <div className="mt-2 pt-2 border-t-[1pt] border-black flex justify-between items-center">
-                    <div className="flex items-center gap-1">
-                      <CheckCircle size={8} />
-                      <span className="text-[6pt] font-black uppercase">Valid & Terverifikasi Digital</span>
+                 <div className="absolute bottom-4 left-6 right-6 pt-2 border-t-[1pt] border-black flex justify-between items-center">
+                    <p className="text-[6pt] font-black uppercase">Terenkripsi Digital</p>
+                    <p className="text-[6pt] font-black text-gray-400 uppercase tracking-widest">Smart ANC v4.0</p>
+                 </div>
+              </div>
+
+              {/* SISI BELAKANG KARTU - Edit instruksi di sini */}
+              <div className="card-to-print w-[85.6mm] h-[54mm] bg-white border-[2.5pt] border-black rounded-[15pt] p-6 relative overflow-hidden">
+                 <div className="mb-4 pb-2 border-b border-gray-300">
+                    <h3 className="text-[10pt] font-black uppercase tracking-[0.1em]">INSTRUKSI LAYANAN</h3>
+                 </div>
+
+                 <div className="space-y-4 flex-1">
+                    <p className="text-[8pt] font-bold text-black uppercase leading-tight">• BAWA KARTU INI SAAT KONTROL KE PUSKESMAS.</p>
+                    <p className="text-[8pt] font-bold text-black uppercase leading-tight">• SCAN QR CODE UNTUK MELIHAT REKAM MEDIS.</p>
+                    <p className="text-[8pt] font-bold text-black uppercase leading-tight">• HUBUNGI BIDAN JIKA ADA TANDA BAHAYA.</p>
+                 </div>
+
+                 <div className="absolute bottom-4 left-0 right-0 text-center px-6">
+                    <div className="pt-2 border-t border-gray-200">
+                       <p className="text-[8pt] font-black uppercase">{PUSKESMAS_INFO.phone}</p>
+                       <p className="text-[5pt] font-bold text-gray-400 uppercase">Emergency Hot-Line</p>
                     </div>
-                    <p className="text-[5pt] font-black text-gray-400 uppercase tracking-widest">Smart ANC System</p>
                  </div>
               </div>
 
-              {/* SISI BELAKANG KARTU */}
-              <div className="card-container w-[85.6mm] h-[54mm] bg-white border-[2pt] border-black rounded-[12pt] flex flex-col p-6 relative overflow-hidden">
-                 <div className="mb-4 pb-2 border-b border-gray-200">
-                    <h3 className="text-[9pt] font-black uppercase tracking-widest">Instruksi & Layanan</h3>
-                 </div>
-
-                 <div className="space-y-3 flex-1">
-                    <p className="text-[7pt] font-bold text-black uppercase leading-tight">• Bawa kartu ini setiap melakukan pemeriksaan kehamilan (ANC).</p>
-                    <p className="text-[7pt] font-bold text-black uppercase leading-tight">• Scan QR Code di kartu ini untuk melihat riwayat medis lengkap secara instan.</p>
-                    <p className="text-[7pt] font-bold text-black uppercase leading-tight">• Hubungi {PUSKESMAS_INFO.phone} jika terjadi tanda bahaya kehamilan.</p>
-                 </div>
-
-                 <div className="mt-2 pt-2 border-t border-gray-100 text-center">
-                    <p className="text-[7pt] font-black uppercase">{PUSKESMAS_INFO.name}</p>
-                    <p className="text-[5pt] font-bold text-gray-400 uppercase italic">Digital Health Identification</p>
-                 </div>
-              </div>
-
-              <div className="w-full text-center mt-10">
-                <p className="text-[10pt] font-black text-gray-300 uppercase tracking-widest">Gunting Sesuai Garis Tepi Hitam Kartu.</p>
+              <div className="mt-16 text-center text-gray-300">
+                 <p className="text-[12pt] font-black uppercase tracking-[0.3em]">Gunting Tepat Pada Garis Tepi</p>
               </div>
             </div>
           </div>
 
-          {/* HANYA SATU TOMBOL: SIMPAN KARTU */}
+          {/* TOMBOL AKSI UTAMA (Sembunyi saat cetak) */}
           <div className="no-print px-4">
             <button 
               onClick={handleSaveCard} 
-              className="w-full py-7 bg-slate-900 text-white rounded-[2.5rem] font-black shadow-2xl flex items-center justify-center gap-6 hover:bg-slate-800 transition-all uppercase text-sm tracking-[0.2em] active:scale-95 group"
+              className="w-full py-8 bg-slate-900 text-white rounded-[2.5rem] font-black shadow-2xl flex items-center justify-center gap-6 hover:bg-indigo-600 transition-all uppercase text-sm tracking-[0.2em] active:scale-95 group"
             >
-              <Save size={24} className="group-hover:rotate-12 transition-transform" /> SIMPAN KARTU ANC PINTAR
+              <Save size={24} className="group-hover:rotate-12 transition-transform" /> SIMPAN KARTU (PDF/CETAK)
             </button>
-            <p className="text-center mt-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              Gunakan Barcode pada kartu untuk akses cepat riwayat medis oleh Tenaga Kesehatan.
+            <p className="text-center mt-8 text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
+              Klik tombol di atas, lalu pada pilihan printer pilih <span className="text-indigo-600">"Save as PDF"</span> <br/> 
+              untuk menyimpan kartu ke dalam galeri handphone atau laptop Anda.
             </p>
           </div>
         </div>
@@ -176,7 +178,7 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
           </div>
           <div>
             <h4 className="text-2xl font-black text-slate-300 uppercase tracking-tighter">Kartu Belum Tergenerasi</h4>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Pilih pasien untuk menampilkan data kartu digital</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Pilih pasien untuk menampilkan kartu digital</p>
           </div>
         </div>
       )}
