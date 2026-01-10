@@ -19,12 +19,20 @@
                 display: none !important; 
             }
             
+            /* RESET GLOBAL SHADOW SAAT PRINT */
+            * {
+                box-shadow: none !important;
+                text-shadow: none !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
             /* Reset dasar body saat cetak */
             html, body {
                 background: white !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                height: 99% !important; /* Mencegah trigger halaman baru */
+                height: 99% !important;
                 overflow: hidden !important;
             }
 
@@ -44,16 +52,13 @@
                 break-inside: avoid !important;
                 margin-bottom: 30px !important;
                 display: block !important;
+                box-shadow: none !important; /* Double check shadow */
+                border: 2pt solid black !important; /* Pastikan border hitam pekat */
             }
             
             @page {
                 size: A4 portrait;
-                margin: 0; /* Margin diatur di kontainer internal */
-            }
-            
-            * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
+                margin: 0;
             }
         }
         

@@ -82,21 +82,17 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
             </div>
           </div>
 
-          {/* ========================================================================= */}
-          /* TEMPLATE CETAK (Hanya muncul saat CTRL+P atau tombol Simpan diklik)      */
-          /* EDIT AREA DI BAWAH INI UNTUK MENGUBAH TAMPILAN HASIL DOWNLOAD/PRINT     */
-          {/* ========================================================================= */}
+          {/* TEMPLATE CETAK (Shadow Dihilangkan via Class & CSS Print) */}
           <div className="print-only">
             <div className="flex flex-col items-center w-full">
               
-              {/* HEADER HALAMAN CETAK (Opsional) */}
               <div className="w-full text-center mb-10 border-b-2 border-black pb-4">
                  <h2 className="text-xl font-black uppercase">Dokumen Kartu Kesehatan Digital</h2>
                  <p className="text-xs font-bold uppercase">{PUSKESMAS_INFO.name}</p>
               </div>
 
-              {/* SISI DEPAN KARTU - Edit style di sini */}
-              <div className="card-to-print w-[85.6mm] h-[54mm] bg-white border-[2.5pt] border-black rounded-[15pt] p-6 relative overflow-hidden mb-12">
+              {/* SISI DEPAN KARTU */}
+              <div className="card-to-print w-[85.6mm] h-[54mm] bg-white border-[2.5pt] border-black rounded-[15pt] p-6 relative overflow-hidden mb-12 shadow-none">
                  <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-2">
                       <ShieldCheck size={18} className="text-black" />
@@ -108,11 +104,9 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
                  </div>
                  
                  <div className="flex gap-6 items-center">
-                    {/* Barcode Area */}
                     <div className="bg-white p-1 border-[1.5pt] border-black rounded-lg">
                        <QRCode value={getQrValue(patientToDisplay.id)} size={75} fgColor="#000000" />
                     </div>
-                    {/* Info Area */}
                     <div className="flex-1 space-y-3">
                        <div>
                           <p className="text-[6pt] font-black text-gray-500 uppercase">Nama Pasien</p>
@@ -131,8 +125,8 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
                  </div>
               </div>
 
-              {/* SISI BELAKANG KARTU - Edit instruksi di sini */}
-              <div className="card-to-print w-[85.6mm] h-[54mm] bg-white border-[2.5pt] border-black rounded-[15pt] p-6 relative overflow-hidden">
+              {/* SISI BELAKANG KARTU */}
+              <div className="card-to-print w-[85.6mm] h-[54mm] bg-white border-[2.5pt] border-black rounded-[15pt] p-6 relative overflow-hidden shadow-none">
                  <div className="mb-4 pb-2 border-b border-gray-300">
                     <h3 className="text-[10pt] font-black uppercase tracking-[0.1em]">INSTRUKSI LAYANAN</h3>
                  </div>
@@ -157,7 +151,6 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
             </div>
           </div>
 
-          {/* TOMBOL AKSI UTAMA (Sembunyi saat cetak) */}
           <div className="no-print px-4">
             <button 
               onClick={handleSaveCard} 
@@ -186,7 +179,7 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
   );
 };
 
-// ... (EducationModule dan ContactModule tetap sama)
+// ... (EducationModule, ContactModule, AccessDenied tetap sama)
 export const EducationModule = () => {
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
 
