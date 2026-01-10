@@ -95,6 +95,7 @@ export interface SystemLog {
 
 export interface AppState {
   currentUser: User | null;
+  currentView?: string;
   users: User[];
   ancVisits: ANCVisit[];
   alerts: SystemAlert[];
