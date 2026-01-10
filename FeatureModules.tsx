@@ -46,7 +46,7 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
 
       {patientToDisplay ? (
         <div className="space-y-10">
-          {/* PREVIEW LAYAR (No-Print) */}
+          {/* PREVIEW LAYAR (No-Print - Tetap Berwarna untuk UI) */}
           <div className="no-print bg-white p-10 md:p-14 rounded-[4rem] shadow-2xl relative overflow-hidden border border-slate-100">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12 relative z-10">
               <div className="flex items-center gap-5">
@@ -82,21 +82,21 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
             </div>
           </div>
 
-          {/* TEMPLATE CETAK (Shadow Dihilangkan via Class & CSS Print) */}
+          {/* TEMPLATE CETAK MONOKROM (BLACK & WHITE) */}
           <div className="print-only">
             <div className="flex flex-col items-center w-full">
               
               <div className="w-full text-center mb-10 border-b-2 border-black pb-4">
-                 <h2 className="text-xl font-black uppercase">Dokumen Kartu Kesehatan Digital</h2>
-                 <p className="text-xs font-bold uppercase">{PUSKESMAS_INFO.name}</p>
+                 <h2 className="text-xl font-black uppercase text-black">Dokumen Kartu Kesehatan Digital</h2>
+                 <p className="text-xs font-bold uppercase text-black">{PUSKESMAS_INFO.name}</p>
               </div>
 
-              {/* SISI DEPAN KARTU */}
-              <div className="card-to-print w-[85.6mm] h-[54mm] bg-white border-[2.5pt] border-black rounded-[15pt] p-6 relative overflow-hidden mb-12 shadow-none">
+              {/* SISI DEPAN KARTU - BLACK AND WHITE DESIGN */}
+              <div className="card-to-print w-[85.6mm] h-[54mm] bg-white border-[3pt] border-black rounded-[15pt] p-6 relative overflow-hidden mb-12 shadow-none">
                  <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-2">
                       <ShieldCheck size={18} className="text-black" />
-                      <h2 className="text-[12pt] font-black uppercase tracking-tighter">KARTU ANC PINTAR</h2>
+                      <h2 className="text-[12pt] font-black uppercase tracking-tighter text-black">KARTU ANC PINTAR</h2>
                     </div>
                     <div className="text-right">
                       <p className="text-[7pt] font-black text-black uppercase leading-none">PASAR MINGGU</p>
@@ -104,49 +104,51 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
                  </div>
                  
                  <div className="flex gap-6 items-center">
-                    <div className="bg-white p-1 border-[1.5pt] border-black rounded-lg">
-                       <QRCode value={getQrValue(patientToDisplay.id)} size={75} fgColor="#000000" />
+                    {/* Barcode Area - High Contrast B&W */}
+                    <div className="bg-white p-1 border-[2pt] border-black rounded-lg">
+                       <QRCode value={getQrValue(patientToDisplay.id)} size={80} fgColor="#000000" bgColor="#FFFFFF" />
                     </div>
+                    {/* Info Area */}
                     <div className="flex-1 space-y-3">
                        <div>
-                          <p className="text-[6pt] font-black text-gray-500 uppercase">Nama Pasien</p>
+                          <p className="text-[6pt] font-black text-black opacity-60 uppercase">Nama Pasien</p>
                           <p className="text-[11pt] font-black text-black uppercase truncate leading-none">{patientToDisplay.name}</p>
                        </div>
                        <div>
-                          <p className="text-[6pt] font-black text-gray-500 uppercase">ID Sistem</p>
+                          <p className="text-[6pt] font-black text-black opacity-60 uppercase">ID Sistem</p>
                           <p className="text-[10pt] font-black text-black leading-none">{patientToDisplay.id}</p>
                        </div>
                     </div>
                  </div>
                  
-                 <div className="absolute bottom-4 left-6 right-6 pt-2 border-t-[1pt] border-black flex justify-between items-center">
-                    <p className="text-[6pt] font-black uppercase">Terenkripsi Digital</p>
-                    <p className="text-[6pt] font-black text-gray-400 uppercase tracking-widest">Smart ANC v4.0</p>
+                 <div className="absolute bottom-4 left-6 right-6 pt-2 border-t-[1.5pt] border-black flex justify-between items-center">
+                    <p className="text-[6pt] font-black uppercase text-black">Terenkripsi Digital</p>
+                    <p className="text-[6pt] font-black text-black opacity-40 uppercase tracking-widest">Smart ANC v4.0</p>
                  </div>
               </div>
 
-              {/* SISI BELAKANG KARTU */}
-              <div className="card-to-print w-[85.6mm] h-[54mm] bg-white border-[2.5pt] border-black rounded-[15pt] p-6 relative overflow-hidden shadow-none">
-                 <div className="mb-4 pb-2 border-b border-gray-300">
-                    <h3 className="text-[10pt] font-black uppercase tracking-[0.1em]">INSTRUKSI LAYANAN</h3>
+              {/* SISI BELAKANG KARTU - BLACK AND WHITE DESIGN */}
+              <div className="card-to-print w-[85.6mm] h-[54mm] bg-white border-[3pt] border-black rounded-[15pt] p-6 relative overflow-hidden shadow-none">
+                 <div className="mb-4 pb-2 border-b-2 border-black">
+                    <h3 className="text-[10pt] font-black uppercase tracking-[0.1em] text-black">INSTRUKSI LAYANAN</h3>
                  </div>
 
                  <div className="space-y-4 flex-1">
-                    <p className="text-[8pt] font-bold text-black uppercase leading-tight">• BAWA KARTU INI SAAT KONTROL KE PUSKESMAS.</p>
-                    <p className="text-[8pt] font-bold text-black uppercase leading-tight">• SCAN QR CODE UNTUK MELIHAT REKAM MEDIS.</p>
-                    <p className="text-[8pt] font-bold text-black uppercase leading-tight">• HUBUNGI BIDAN JIKA ADA TANDA BAHAYA.</p>
+                    <p className="text-[8pt] font-black text-black uppercase leading-tight">• BAWA KARTU INI SAAT KONTROL KE PUSKESMAS.</p>
+                    <p className="text-[8pt] font-black text-black uppercase leading-tight">• SCAN QR CODE UNTUK MELIHAT REKAM MEDIS.</p>
+                    <p className="text-[8pt] font-black text-black uppercase leading-tight">• HUBUNGI BIDAN JIKA ADA TANDA BAHAYA.</p>
                  </div>
 
                  <div className="absolute bottom-4 left-0 right-0 text-center px-6">
-                    <div className="pt-2 border-t border-gray-200">
-                       <p className="text-[8pt] font-black uppercase">{PUSKESMAS_INFO.phone}</p>
-                       <p className="text-[5pt] font-bold text-gray-400 uppercase">Emergency Hot-Line</p>
+                    <div className="pt-2 border-t-2 border-black">
+                       <p className="text-[8pt] font-black uppercase text-black">{PUSKESMAS_INFO.phone}</p>
+                       <p className="text-[5pt] font-black text-black opacity-40 uppercase tracking-widest">Emergency Hot-Line</p>
                     </div>
                  </div>
               </div>
 
-              <div className="mt-16 text-center text-gray-300">
-                 <p className="text-[12pt] font-black uppercase tracking-[0.3em]">Gunting Tepat Pada Garis Tepi</p>
+              <div className="mt-16 text-center text-black opacity-30">
+                 <p className="text-[12pt] font-black uppercase tracking-[0.3em]">Gunting Tepat Pada Garis Tepi Hitam</p>
               </div>
             </div>
           </div>
@@ -154,13 +156,13 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
           <div className="no-print px-4">
             <button 
               onClick={handleSaveCard} 
-              className="w-full py-8 bg-slate-900 text-white rounded-[2.5rem] font-black shadow-2xl flex items-center justify-center gap-6 hover:bg-indigo-600 transition-all uppercase text-sm tracking-[0.2em] active:scale-95 group"
+              className="w-full py-8 bg-slate-900 text-white rounded-[2.5rem] font-black shadow-2xl flex items-center justify-center gap-6 hover:bg-black transition-all uppercase text-sm tracking-[0.2em] active:scale-95 group"
             >
-              <Save size={24} className="group-hover:rotate-12 transition-transform" /> SIMPAN KARTU (PDF/CETAK)
+              <Save size={24} className="group-hover:rotate-12 transition-transform" /> SIMPAN KARTU (HITAM PUTIH)
             </button>
             <p className="text-center mt-8 text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
-              Klik tombol di atas, lalu pada pilihan printer pilih <span className="text-indigo-600">"Save as PDF"</span> <br/> 
-              untuk menyimpan kartu ke dalam galeri handphone atau laptop Anda.
+              Hasil download akan otomatis dikonversi menjadi <span className="text-black font-black">Monokrom (Hitam & Putih)</span> <br/> 
+              untuk kemudahan pencetakan dan kejelasan data.
             </p>
           </div>
         </div>
@@ -179,7 +181,7 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
   );
 };
 
-// ... (EducationModule, ContactModule, AccessDenied tetap sama)
+// ... (Rest of EducationModule and other components remain unchanged as they don't affect the print result of SmartCardModule)
 export const EducationModule = () => {
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
 

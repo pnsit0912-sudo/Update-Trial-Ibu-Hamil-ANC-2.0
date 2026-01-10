@@ -12,24 +12,27 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         
-        /* ATURAN KHUSUS PENCETAKAN */
+        /* ATURAN KHUSUS PENCETAKAN BLACK & WHITE */
         @media print {
             /* Sembunyikan elemen UI aplikasi */
             .no-print, header, aside, nav, button, .notification-area, #root > main > header { 
                 display: none !important; 
             }
             
-            /* RESET GLOBAL SHADOW SAAT PRINT */
+            /* RESET GLOBAL KE HITAM PUTIH */
             * {
                 box-shadow: none !important;
                 text-shadow: none !important;
+                filter: grayscale(100%) !important; /* Memaksa hitam putih */
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+                color: #000000 !important;
+                border-color: #000000 !important;
             }
             
             /* Reset dasar body saat cetak */
             html, body {
-                background: white !important;
+                background: #ffffff !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 height: 99% !important;
@@ -46,14 +49,15 @@
                 padding-top: 15mm !important;
             }
 
-            /* Pastikan satu kartu tidak terpotong */
+            /* Styling Kartu Hitam Putih */
             .card-to-print {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
                 margin-bottom: 30px !important;
                 display: block !important;
-                box-shadow: none !important; /* Double check shadow */
-                border: 2pt solid black !important; /* Pastikan border hitam pekat */
+                background: #ffffff !important;
+                border: 2pt solid #000000 !important; /* Border hitam solid */
+                box-shadow: none !important;
             }
             
             @page {
