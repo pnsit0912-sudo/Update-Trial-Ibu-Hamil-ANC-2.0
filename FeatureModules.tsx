@@ -9,6 +9,17 @@ import { User, AppState, EducationContent } from './types';
 export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppState, setState: any, isUser: boolean, user: User }) => {
   const patientToDisplay = isUser ? user : state.users.find(u => u.id === state.selectedPatientId);
   
+  // ==========================================
+  // COLOR CONTROL CENTER (EDIT DI SINI)
+  // ==========================================
+  const CARD_COLORS = {
+    paper: "#FFFFFF",    // Warna Kertas (Background Kartu)
+    text: "#000000",     // Warna Teks Utama & Border
+    barcode: "#000000",  // Warna QR Code (Foreground)
+    barcodeBg: "#FFFFFF",// Warna Background QR Code
+    accent: "#000000"    // Warna Ikon / Aksen
+  };
+
   const getQrValue = (pid: string) => {
     return `${window.location.origin}${window.location.pathname}?pid=${pid}`;
   };
@@ -19,7 +30,7 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
 
   return (
     <div className="max-w-2xl mx-auto space-y-12 animate-in zoom-in-95 duration-700">
-      {/* SELEKTOR PASIEN (Hanya muncul di layar) */}
+      {/* SELEKTOR PASIEN */}
       {!isUser && (
          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm no-print">
            <div className="flex items-center gap-4 mb-6">
@@ -46,7 +57,7 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
 
       {patientToDisplay ? (
         <div className="space-y-10">
-          {/* PREVIEW LAYAR (No-Print - Tetap Berwarna untuk UI) */}
+          {/* PREVIEW LAYAR (No-Print) */}
           <div className="no-print bg-white p-10 md:p-14 rounded-[4rem] shadow-2xl relative overflow-hidden border border-slate-100">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12 relative z-10">
               <div className="flex items-center gap-5">
@@ -82,73 +93,87 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
             </div>
           </div>
 
-          {/* TEMPLATE CETAK MONOKROM (BLACK & WHITE) */}
+          {/* TEMPLATE CETAK (DIPISAHKAN WARNA ELEMENNYA) */}
           <div className="print-only">
-            <div className="flex flex-col items-center w-full">
+            <div className="flex flex-col items-center w-full bg-white">
               
               <div className="w-full text-center mb-10 border-b-2 border-black pb-4">
-                 <h2 className="text-xl font-black uppercase text-black">Dokumen Kartu Kesehatan Digital</h2>
-                 <p className="text-xs font-bold uppercase text-black">{PUSKESMAS_INFO.name}</p>
+                 <h2 className="text-xl font-black uppercase" style={{ color: CARD_COLORS.text }}>Dokumen Kartu Kesehatan Digital</h2>
+                 <p className="text-xs font-bold uppercase" style={{ color: CARD_COLORS.text }}>{PUSKESMAS_INFO.name}</p>
               </div>
 
-              {/* SISI DEPAN KARTU - BLACK AND WHITE DESIGN */}
-              <div className="card-to-print w-[85.6mm] h-[54mm] bg-white border-[3pt] border-black rounded-[15pt] p-6 relative overflow-hidden mb-12 shadow-none">
+              {/* SISI DEPAN KARTU */}
+              <div className="card-to-print w-[85.6mm] h-[54mm] rounded-[15pt] p-6 relative overflow-hidden mb-12"
+                   style={{ 
+                     backgroundColor: CARD_COLORS.paper, 
+                     border: `2.5pt solid ${CARD_COLORS.text}` 
+                   }}>
                  <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-2">
-                      <ShieldCheck size={18} className="text-black" />
-                      <h2 className="text-[12pt] font-black uppercase tracking-tighter text-black">KARTU ANC PINTAR</h2>
+                      <ShieldCheck size={18} style={{ color: CARD_COLORS.accent }} />
+                      <h2 className="text-[12pt] font-black uppercase tracking-tighter" style={{ color: CARD_COLORS.text }}>KARTU ANC PINTAR</h2>
                     </div>
                     <div className="text-right">
-                      <p className="text-[7pt] font-black text-black uppercase leading-none">PASAR MINGGU</p>
+                      <p className="text-[7pt] font-black uppercase leading-none" style={{ color: CARD_COLORS.text }}>PASAR MINGGU</p>
                     </div>
                  </div>
                  
                  <div className="flex gap-6 items-center">
-                    {/* Barcode Area - High Contrast B&W */}
-                    <div className="bg-white p-1 border-[2pt] border-black rounded-lg">
-                       <QRCode value={getQrValue(patientToDisplay.id)} size={80} fgColor="#000000" bgColor="#FFFFFF" />
+                    {/* QR Code Area - Terpisah Warnanya */}
+                    <div className="p-1 border-[1.5pt] rounded-lg" style={{ borderColor: CARD_COLORS.text, backgroundColor: CARD_COLORS.barcodeBg }}>
+                       <QRCode 
+                        value={getQrValue(patientToDisplay.id)} 
+                        size={80} 
+                        fgColor={CARD_COLORS.barcode} 
+                        bgColor={CARD_COLORS.barcodeBg} 
+                       />
                     </div>
                     {/* Info Area */}
                     <div className="flex-1 space-y-3">
                        <div>
-                          <p className="text-[6pt] font-black text-black opacity-60 uppercase">Nama Pasien</p>
-                          <p className="text-[11pt] font-black text-black uppercase truncate leading-none">{patientToDisplay.name}</p>
+                          <p className="text-[6pt] font-black uppercase opacity-60" style={{ color: CARD_COLORS.text }}>Nama Pasien</p>
+                          <p className="text-[11pt] font-black uppercase truncate leading-none" style={{ color: CARD_COLORS.text }}>{patientToDisplay.name}</p>
                        </div>
                        <div>
-                          <p className="text-[6pt] font-black text-black opacity-60 uppercase">ID Sistem</p>
-                          <p className="text-[10pt] font-black text-black leading-none">{patientToDisplay.id}</p>
+                          <p className="text-[6pt] font-black uppercase opacity-60" style={{ color: CARD_COLORS.text }}>ID Sistem</p>
+                          <p className="text-[10pt] font-black leading-none" style={{ color: CARD_COLORS.text }}>{patientToDisplay.id}</p>
                        </div>
                     </div>
                  </div>
                  
-                 <div className="absolute bottom-4 left-6 right-6 pt-2 border-t-[1.5pt] border-black flex justify-between items-center">
-                    <p className="text-[6pt] font-black uppercase text-black">Terenkripsi Digital</p>
-                    <p className="text-[6pt] font-black text-black opacity-40 uppercase tracking-widest">Smart ANC v4.0</p>
+                 <div className="absolute bottom-4 left-6 right-6 pt-2 flex justify-between items-center" 
+                      style={{ borderTop: `1pt solid ${CARD_COLORS.text}` }}>
+                    <p className="text-[6pt] font-black uppercase" style={{ color: CARD_COLORS.text }}>Terenkripsi Digital</p>
+                    <p className="text-[6pt] font-black opacity-40 uppercase tracking-widest" style={{ color: CARD_COLORS.text }}>Smart ANC v4.0</p>
                  </div>
               </div>
 
-              {/* SISI BELAKANG KARTU - BLACK AND WHITE DESIGN */}
-              <div className="card-to-print w-[85.6mm] h-[54mm] bg-white border-[3pt] border-black rounded-[15pt] p-6 relative overflow-hidden shadow-none">
-                 <div className="mb-4 pb-2 border-b-2 border-black">
-                    <h3 className="text-[10pt] font-black uppercase tracking-[0.1em] text-black">INSTRUKSI LAYANAN</h3>
+              {/* SISI BELAKANG KARTU */}
+              <div className="card-to-print w-[85.6mm] h-[54mm] rounded-[15pt] p-6 relative overflow-hidden"
+                   style={{ 
+                     backgroundColor: CARD_COLORS.paper, 
+                     border: `2.5pt solid ${CARD_COLORS.text}` 
+                   }}>
+                 <div className="mb-4 pb-2" style={{ borderBottom: `1pt solid ${CARD_COLORS.text}` }}>
+                    <h3 className="text-[10pt] font-black uppercase tracking-[0.1em]" style={{ color: CARD_COLORS.text }}>INSTRUKSI LAYANAN</h3>
                  </div>
 
                  <div className="space-y-4 flex-1">
-                    <p className="text-[8pt] font-black text-black uppercase leading-tight">• BAWA KARTU INI SAAT KONTROL KE PUSKESMAS.</p>
-                    <p className="text-[8pt] font-black text-black uppercase leading-tight">• SCAN QR CODE UNTUK MELIHAT REKAM MEDIS.</p>
-                    <p className="text-[8pt] font-black text-black uppercase leading-tight">• HUBUNGI BIDAN JIKA ADA TANDA BAHAYA.</p>
+                    <p className="text-[8pt] font-bold uppercase leading-tight" style={{ color: CARD_COLORS.text }}>• BAWA KARTU INI SAAT KONTROL KE PUSKESMAS.</p>
+                    <p className="text-[8pt] font-bold uppercase leading-tight" style={{ color: CARD_COLORS.text }}>• SCAN QR CODE UNTUK MELIHAT REKAM MEDIS.</p>
+                    <p className="text-[8pt] font-bold uppercase leading-tight" style={{ color: CARD_COLORS.text }}>• HUBUNGI BIDAN JIKA ADA TANDA BAHAYA.</p>
                  </div>
 
                  <div className="absolute bottom-4 left-0 right-0 text-center px-6">
-                    <div className="pt-2 border-t-2 border-black">
-                       <p className="text-[8pt] font-black uppercase text-black">{PUSKESMAS_INFO.phone}</p>
-                       <p className="text-[5pt] font-black text-black opacity-40 uppercase tracking-widest">Emergency Hot-Line</p>
+                    <div className="pt-2" style={{ borderTop: `1pt solid ${CARD_COLORS.text}` }}>
+                       <p className="text-[8pt] font-black uppercase" style={{ color: CARD_COLORS.text }}>{PUSKESMAS_INFO.phone}</p>
+                       <p className="text-[5pt] font-bold opacity-40 uppercase tracking-widest" style={{ color: CARD_COLORS.text }}>Emergency Hot-Line</p>
                     </div>
                  </div>
               </div>
 
-              <div className="mt-16 text-center text-black opacity-30">
-                 <p className="text-[12pt] font-black uppercase tracking-[0.3em]">Gunting Tepat Pada Garis Tepi Hitam</p>
+              <div className="mt-16 text-center opacity-30">
+                 <p className="text-[12pt] font-black uppercase tracking-[0.3em]" style={{ color: CARD_COLORS.text }}>Gunting Tepat Pada Garis Tepi Hitam</p>
               </div>
             </div>
           </div>
@@ -158,11 +183,11 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
               onClick={handleSaveCard} 
               className="w-full py-8 bg-slate-900 text-white rounded-[2.5rem] font-black shadow-2xl flex items-center justify-center gap-6 hover:bg-black transition-all uppercase text-sm tracking-[0.2em] active:scale-95 group"
             >
-              <Save size={24} className="group-hover:rotate-12 transition-transform" /> SIMPAN KARTU (HITAM PUTIH)
+              <Save size={24} className="group-hover:rotate-12 transition-transform" /> SIMPAN KARTU (CETAK/PDF)
             </button>
             <p className="text-center mt-8 text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
-              Hasil download akan otomatis dikonversi menjadi <span className="text-black font-black">Monokrom (Hitam & Putih)</span> <br/> 
-              untuk kemudahan pencetakan dan kejelasan data.
+              Pastikan Anda menggunakan kertas putih bersih untuk hasil terbaik. <br/> 
+              Warna teks, barcode, dan kertas telah dipisahkan untuk ketajaman dokumen.
             </p>
           </div>
         </div>
@@ -181,7 +206,7 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
   );
 };
 
-// ... (Rest of EducationModule and other components remain unchanged as they don't affect the print result of SmartCardModule)
+// ... (Rest of EducationModule, ContactModule, AccessDenied remains same)
 export const EducationModule = () => {
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
 

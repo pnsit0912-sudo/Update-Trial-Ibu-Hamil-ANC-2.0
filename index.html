@@ -12,52 +12,52 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         
-        /* ATURAN KHUSUS PENCETAKAN BLACK & WHITE */
+        /* ATURAN KHUSUS PENCETAKAN TINGKAT LANJUT */
         @media print {
             /* Sembunyikan elemen UI aplikasi */
             .no-print, header, aside, nav, button, .notification-area, #root > main > header { 
                 display: none !important; 
             }
             
-            /* RESET GLOBAL KE HITAM PUTIH */
+            /* RESET GLOBAL */
             * {
                 box-shadow: none !important;
                 text-shadow: none !important;
-                filter: grayscale(100%) !important; /* Memaksa hitam putih */
+                /* Filter grayscale dihapus agar warna individu bisa muncul */
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
-                color: #000000 !important;
-                border-color: #000000 !important;
             }
             
-            /* Reset dasar body saat cetak */
+            /* Paksa Kertas Berwarna Putih Bersih */
             html, body {
-                background: #ffffff !important;
+                background-color: #ffffff !important;
+                background-image: none !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                height: 99% !important;
-                overflow: hidden !important;
+                height: auto !important;
+                width: 100% !important;
             }
 
-            /* Tampilkan area kartu */
+            /* Container Utama Print */
             .print-only { 
                 display: flex !important; 
                 flex-direction: column !important;
                 align-items: center !important;
                 justify-content: flex-start !important;
                 width: 100% !important;
-                padding-top: 15mm !important;
+                padding-top: 20mm !important;
+                background-color: #ffffff !important;
             }
 
-            /* Styling Kartu Hitam Putih */
+            /* Item Kartu */
             .card-to-print {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
-                margin-bottom: 30px !important;
+                margin-bottom: 50px !important;
                 display: block !important;
-                background: #ffffff !important;
-                border: 2pt solid #000000 !important; /* Border hitam solid */
+                /* Shadow dinonaktifkan sepenuhnya */
                 box-shadow: none !important;
+                position: relative !important;
             }
             
             @page {
