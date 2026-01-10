@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { HeartPulse, Printer, Download, MapPin, Phone, Mail, UserX, AlertCircle, ShieldCheck, Share2, Filter, LayoutGrid, MessageSquare, Send, CheckCircle, Fingerprint, CalendarDays, Building2, UserCircle2, QrCode, Baby, Sparkles, Scale, Info, Crosshair } from 'lucide-react';
+import { HeartPulse, Printer, Download, MapPin, Phone, Mail, UserX, AlertCircle, ShieldCheck, Share2, Filter, LayoutGrid, MessageSquare, Send, CheckCircle, Fingerprint, CalendarDays, Building2, UserCircle2, QrCode, Baby, Sparkles, Scale, Info, Crosshair, Save } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { PUSKESMAS_INFO, EDUCATION_LIST } from './constants';
 import { User, AppState, EducationContent } from './types';
@@ -9,6 +9,16 @@ import { User, AppState, EducationContent } from './types';
 export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppState, setState: any, isUser: boolean, user: User }) => {
   const patientToDisplay = isUser ? user : state.users.find(u => u.id === state.selectedPatientId);
   
+  // URL untuk QR Code agar saat di-scan langsung membuka profil (PID)
+  const getQrValue = (pid: string) => {
+    return `${window.location.origin}${window.location.pathname}?pid=${pid}`;
+  };
+
+  const handleSaveCard = () => {
+    // Simulasi simpan kartu (bisa dikembangkan ke download image menggunakan html2canvas)
+    window.print();
+  };
+
   return (
     <div className="max-w-2xl mx-auto space-y-12 animate-in zoom-in-95 duration-700">
       {/* Selector untuk Nakes/Admin (Disembunyikan saat cetak) */}
@@ -58,7 +68,7 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
             <div className="flex flex-col lg:flex-row gap-12 relative z-10">
               <div className="flex flex-col items-center justify-center shrink-0">
                 <div className="bg-white p-6 border-[6px] border-slate-900 rounded-[3rem] shadow-2xl relative">
-                  <QRCode value={`ANC-${patientToDisplay.id}`} size={160} />
+                  <QRCode value={getQrValue(patientToDisplay.id)} size={160} />
                 </div>
                 <div className="mt-6 bg-slate-900 text-white px-6 py-2 rounded-full text-[9px] font-black tracking-widest uppercase shadow-lg">
                   ID: {patientToDisplay.id}
@@ -120,7 +130,7 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
                  
                  <div className="flex gap-5 items-center flex-1 relative z-10 bg-white">
                     <div className="bg-white p-1.5 border-[2pt] border-black rounded-2xl shrink-0">
-                       <QRCode value={`ANC-${patientToDisplay.id}`} size={70} fgColor="#000000" />
+                       <QRCode value={getQrValue(patientToDisplay.id)} size={70} fgColor="#000000" />
                     </div>
                     <div className="flex-1 space-y-2.5 min-w-0 bg-white">
                        <div className="space-y-0.5">
@@ -167,7 +177,7 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
                     </div>
                     <div className="flex items-start gap-3">
                       <div className="w-1.5 h-1.5 rounded-full bg-black mt-1.5 shrink-0" />
-                      <p className="text-[8.5pt] font-bold text-black leading-tight uppercase">Hubungi kontak darurat di nomor <b>{PUSKESMAS_INFO.phone}</b> jika terjadi tanda bahaya kehamilan.</p>
+                      <p className="text-[8.5pt] font-bold text-black leading-tight uppercase">Scan Barcode di kartu ini untuk melihat riwayat medis lengkap secara instan.</p>
                     </div>
                     <div className="flex items-start gap-3">
                       <div className="w-1.5 h-1.5 rounded-full bg-black mt-1.5 shrink-0" />
@@ -187,17 +197,17 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
             </div>
           </div>
 
-          {/* Action Buttons (Hidden when printing) */}
-          <div className="flex flex-col sm:flex-row gap-4 no-print px-4">
+          {/* SINGLE ACTION BUTTON: SIMPAN KARTU */}
+          <div className="no-print px-4">
             <button 
-              onClick={() => window.print()} 
-              className="flex-1 py-6 bg-slate-900 text-white rounded-[2rem] font-black shadow-2xl flex items-center justify-center gap-4 hover:bg-slate-800 transition-all uppercase text-xs tracking-widest"
+              onClick={handleSaveCard} 
+              className="w-full py-7 bg-slate-900 text-white rounded-[2.5rem] font-black shadow-2xl flex items-center justify-center gap-6 hover:bg-slate-800 transition-all uppercase text-sm tracking-[0.2em] active:scale-95 group"
             >
-              <Printer size={20} /> Cetak Kartu Fisik
+              <Save size={24} className="group-hover:rotate-12 transition-transform" /> SIMPAN KARTU ANC PINTAR
             </button>
-            <button className="flex-1 py-6 bg-white text-indigo-600 border-4 border-indigo-50 rounded-[2rem] font-black flex items-center justify-center gap-4 hover:bg-indigo-50 transition-all uppercase text-xs tracking-widest">
-              <Download size={20} /> Simpan Digital (PDF)
-            </button>
+            <p className="text-center mt-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              Kartu akan disimpan sebagai asset digital (barcode) untuk akses rekam medis.
+            </p>
           </div>
         </div>
       ) : (
@@ -215,7 +225,7 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
   );
 };
 
-// Modul Edukasi
+// Modul Edukasi (Tetap sama)
 export const EducationModule = () => {
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
 
@@ -317,7 +327,7 @@ export const EducationModule = () => {
   );
 };
 
-// Modul Kontak
+// Modul Kontak (Tetap sama)
 export const ContactModule = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);

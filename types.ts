@@ -95,13 +95,14 @@ export interface SystemLog {
 
 export interface AppState {
   currentUser: User | null;
-  currentView?: string;
   users: User[];
   ancVisits: ANCVisit[];
   alerts: SystemAlert[];
   selectedPatientId: string | null;
   logs: SystemLog[];
   userChecklists: Record<string, Record<string, boolean>>;
+  // Added currentView to support persistence and state management in App.tsx
+  currentView: string;
 }
 
 export interface EducationContent {
