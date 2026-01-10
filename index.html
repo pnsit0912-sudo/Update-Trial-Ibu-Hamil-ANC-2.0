@@ -12,24 +12,30 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         @media print {
-            /* Sembunyikan semua elemen UI */
-            .no-print { display: none !important; }
+            /* 1. Paksa Latar Belakang Putih Murni di Seluruh Level */
+            html, body, #root, main {
+                background-color: #ffffff !important;
+                background-image: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+            }
+
+            /* 2. Sembunyikan semua elemen UI kecuali template cetak */
+            .no-print, header, aside, nav, button:not(.print-trigger) { 
+                display: none !important; 
+            }
             
-            /* Tampilkan area cetak dan paksa rata tengah */
+            /* 3. Atur Kontainer Cetak ke Tengah Sempurna */
             .print-only { 
                 display: flex !important; 
                 flex-direction: column !important;
                 align-items: center !important;
                 justify-content: center !important;
-                height: 100vh !important;
-                width: 100vw !important;
-                background: white !important;
-            }
-            
-            body { 
-                background: white !important;
-                margin: 0 !important;
-                padding: 0 !important;
+                min-height: 100vh !important;
+                width: 100% !important;
+                background-color: #ffffff !important;
             }
             
             @page {
@@ -37,12 +43,17 @@
                 margin: 0;
             }
             
-            /* Paksa printer untuk mencetak warna latar jika ada (meskipun kita set ke putih) */
+            /* 4. Matikan Paksa Pencetakan Warna Latar (Economy Mode) */
             * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
+                -webkit-print-color-adjust: economy !important;
+                print-color-adjust: economy !important;
                 box-shadow: none !important;
                 text-shadow: none !important;
+            }
+
+            /* Pastikan teks tetap hitam pekat */
+            .print-only p, .print-only span, .print-only h2, .print-only h3 {
+                color: #000000 !important;
             }
         }
         
