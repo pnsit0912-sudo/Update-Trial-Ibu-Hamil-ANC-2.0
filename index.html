@@ -14,50 +14,72 @@
         
         /* ATURAN KHUSUS PENCETAKAN TINGKAT LANJUT */
         @media print {
-            /* Sembunyikan elemen UI aplikasi */
-            .no-print, header, aside, nav, button, .notification-area, #root > main > header { 
+            /* 1. Sembunyikan semua elemen UI aplikasi secara total */
+            .no-print, header, aside, nav, button, .notification-area, 
+            #root > main > header, .sidebar, .header-container,
+            [class*="fixed"], [class*="sticky"] { 
                 display: none !important; 
             }
             
-            /* RESET GLOBAL */
+            /* 2. Reset Global: Matikan bayangan dan paksa akurasi warna */
             * {
                 box-shadow: none !important;
                 text-shadow: none !important;
-                /* Filter grayscale dihapus agar warna individu bisa muncul */
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
             
-            /* Paksa Kertas Berwarna Putih Bersih */
+            /* 3. PAKSA LATAR BELAKANG PUTIH PADA SELURUH LAYAR */
             html, body {
                 background-color: #ffffff !important;
-                background-image: none !important;
+                background: #ffffff !important;
+                color: #000000 !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                height: auto !important;
+                height: 100% !important;
                 width: 100% !important;
+                overflow: visible !important;
+                filter: none !important;
             }
 
-            /* Container Utama Print */
+            /* Pastikan kontainer utama root tidak membawa warna background dari App.tsx */
+            #root, #root > main, #root > div {
+                background-color: #ffffff !important;
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                display: block !important;
+            }
+
+            /* 4. Container Utama Print */
             .print-only { 
                 display: flex !important; 
                 flex-direction: column !important;
                 align-items: center !important;
                 justify-content: flex-start !important;
                 width: 100% !important;
-                padding-top: 20mm !important;
-                background-color: #ffffff !important;
+                min-height: 100vh !important;
+                padding-top: 10mm !important;
+                padding-bottom: 10mm !important;
+                background-color: #ffffff !important; /* Paksa putih lagi */
+                visibility: visible !important;
             }
 
-            /* Item Kartu */
+            /* 5. Styling Kartu agar Kontras Tinggi */
             .card-to-print {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
-                margin-bottom: 50px !important;
+                margin-bottom: 40px !important;
                 display: block !important;
-                /* Shadow dinonaktifkan sepenuhnya */
+                background-color: #ffffff !important;
+                border: 2.5pt solid #000000 !important; /* Border hitam solid tebal */
                 box-shadow: none !important;
                 position: relative !important;
+            }
+
+            /* Garis pembatas teks header dokumen */
+            .border-b-2.border-black {
+                border-bottom: 2pt solid #000000 !important;
             }
             
             @page {
@@ -66,7 +88,7 @@
             }
         }
         
-        /* Tampilan di layar browser */
+        /* Tampilan di layar browser (Layar tetap Gray-50 agar mata tidak lelah) */
         .print-only { display: none; }
         #map-container { height: 500px; width: 100%; border-radius: 0.75rem; z-index: 10; }
         html { scroll-behavior: smooth; }
