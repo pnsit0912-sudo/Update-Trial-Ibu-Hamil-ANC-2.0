@@ -11,58 +11,58 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <style>
         body { font-family: 'Inter', sans-serif; }
+        
         @media print {
-            /* 1. Paksa Latar Belakang Putih Murni di Seluruh Level */
-            html, body, #root, main {
-                background-color: #ffffff !important;
-                background-image: none !important;
+            /* 1. Reset Dasar Cetak */
+            html, body {
+                background: #ffffff !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                width: 100% !important;
-                height: 100% !important;
+                width: 100%;
+                height: auto !important;
             }
 
-            /* 2. Sembunyikan semua elemen UI kecuali template cetak */
-            .no-print, header, aside, nav, button:not(.print-trigger) { 
+            /* 2. Sembunyikan semua UI aplikasi */
+            .no-print, header, aside, nav, button, .notification-area { 
                 display: none !important; 
             }
             
-            /* 3. Atur Kontainer Cetak ke Tengah Sempurna */
+            /* 3. Tampilkan hanya template kartu */
             .print-only { 
-                display: flex !important; 
-                flex-direction: column !important;
-                align-items: center !important;
-                justify-content: center !important;
-                min-height: 100vh !important;
+                display: block !important; 
+                visibility: visible !important;
                 width: 100% !important;
-                background-color: #ffffff !important;
+                margin: 0 !important;
+                padding: 20mm 0 !important; /* Margin atas bawah agar rapi di kertas A4 */
+            }
+
+            .card-container {
+                page-break-inside: avoid;
+                break-inside: avoid;
+                margin-bottom: 20px;
             }
             
             @page {
                 size: A4 portrait;
-                margin: 0;
+                margin: 10mm;
             }
             
-            /* 4. Matikan Paksa Pencetakan Warna Latar (Economy Mode) */
+            /* 4. Pastikan warna dan border tercetak */
             * {
-                -webkit-print-color-adjust: economy !important;
-                print-color-adjust: economy !important;
-                box-shadow: none !important;
-                text-shadow: none !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
-
-            /* Pastikan teks tetap hitam pekat */
+            
             .print-only p, .print-only span, .print-only h2, .print-only h3 {
                 color: #000000 !important;
             }
         }
         
+        /* Default state di layar browser */
         .print-only { display: none; }
         #map-container { height: 500px; width: 100%; border-radius: 0.75rem; z-index: 10; }
         .custom-div-icon { background: none; border: none; }
-        /* Smooth scrolling */
         html { scroll-behavior: smooth; }
-        /* Hide scrollbar for clean UI */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>

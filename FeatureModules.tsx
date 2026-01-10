@@ -9,19 +9,20 @@ import { User, AppState, EducationContent } from './types';
 export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppState, setState: any, isUser: boolean, user: User }) => {
   const patientToDisplay = isUser ? user : state.users.find(u => u.id === state.selectedPatientId);
   
-  // URL untuk QR Code agar saat di-scan langsung membuka profil (PID)
+  // URL Lengkap untuk QR Code: Saat discan otomatis membuka profil pasien
   const getQrValue = (pid: string) => {
+    // Menggunakan origin aplikasi saat ini + parameter pid
     return `${window.location.origin}${window.location.pathname}?pid=${pid}`;
   };
 
   const handleSaveCard = () => {
-    // Simulasi simpan kartu (bisa dikembangkan ke download image menggunakan html2canvas)
+    // Memanggil fungsi cetak browser (User bisa pilih Save as PDF untuk menyimpan di HP/Laptop)
     window.print();
   };
 
   return (
     <div className="max-w-2xl mx-auto space-y-12 animate-in zoom-in-95 duration-700">
-      {/* Selector untuk Nakes/Admin (Disembunyikan saat cetak) */}
+      {/* Selector Pasien (Hanya untuk Staff) */}
       {!isUser && (
          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm no-print">
            <div className="flex items-center gap-4 mb-6">
@@ -48,10 +49,9 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
 
       {patientToDisplay ? (
         <div className="space-y-10">
-          {/* DIGITAL PREVIEW ON SCREEN (NOT PRINTED) */}
+          {/* DIGITAL PREVIEW DI LAYAR */}
           <div className="no-print bg-white p-10 md:p-14 rounded-[4rem] shadow-[0_48px_96px_-12px_rgba(79,70,229,0.12)] relative overflow-hidden border border-slate-100">
             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/5 rounded-full blur-3xl -mr-20 -mt-20" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600/5 rounded-full blur-3xl -ml-20 -mb-20" />
             
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12 relative z-10">
               <div className="flex items-center gap-5">
@@ -82,122 +82,81 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
                     <p className="text-xl font-black text-slate-900 uppercase truncate">{patientToDisplay.name}</p>
                   </div>
                   <div className="space-y-1.5">
-                    {patientToDisplay.isDelivered ? (
-                      <p className="text-xl font-black text-emerald-600 uppercase">Pasca Salin (Nifas)</p>
-                    ) : (
-                      <p className="text-xl font-black text-slate-900 uppercase">G{patientToDisplay.pregnancyNumber} | {patientToDisplay.pregnancyMonth} Bulan</p>
-                    )}
+                    <p className="text-xl font-black text-slate-900 uppercase">
+                      {patientToDisplay.isDelivered ? 'Pasca Salin' : `G${patientToDisplay.pregnancyNumber} | ${patientToDisplay.pregnancyMonth} Bln`}
+                    </p>
                   </div>
                 </div>
-
-                {patientToDisplay.isDelivered && patientToDisplay.deliveryData && (
-                  <div className="p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100">
-                    <div className="flex items-center gap-3 border-b border-emerald-100 pb-4 mb-4">
-                      <Baby size={18} className="text-emerald-600" />
-                      <h4 className="text-[10px] font-black text-emerald-800 uppercase tracking-widest">Data Buah Hati</h4>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest">Nama</p>
-                        <p className="text-xs font-black text-slate-900 truncate">{patientToDisplay.deliveryData.babyName || '-'}</p>
-                      </div>
-                      <div>
-                        <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest">Berat</p>
-                        <p className="text-xs font-black text-slate-900">{patientToDisplay.deliveryData.babyWeight}g</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>
 
-          {/* PHYSICAL CARD PRINT TEMPLATE - STRICT WHITE BACKGROUND NO COLORS */}
-          <div className="print-only w-full bg-white text-black">
-            <div className="flex flex-col items-center gap-14 bg-white">
-              {/* FRONT SIDE - ABSOLUTE WHITE */}
-              <div className="w-[85.6mm] h-[54mm] bg-white border-[2pt] border-black rounded-[12pt] relative flex flex-col p-6 shadow-none overflow-hidden">
-                 <div className="flex justify-between items-start relative z-10 mb-3 bg-white">
+          {/* TEMPLATE KHUSUS CETAK - DIPERBAIKI AGAR TIDAK BLANK */}
+          <div className="print-only">
+            <div className="flex flex-col items-center gap-12 w-full">
+              {/* SISI DEPAN KARTU */}
+              <div className="card-container w-[85.6mm] h-[54mm] bg-white border-[2pt] border-black rounded-[12pt] flex flex-col p-6 relative overflow-hidden">
+                 <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-2">
                       <ShieldCheck size={16} className="text-black" />
-                      <h2 className="text-[11pt] font-black uppercase tracking-tighter text-black">KARTU ANC PINTAR</h2>
+                      <h2 className="text-[11pt] font-black uppercase tracking-tighter">KARTU ANC PINTAR</h2>
                     </div>
                     <div className="text-right">
-                      <p className="text-[6pt] font-black text-gray-500 uppercase tracking-widest leading-none mb-0.5">Puskesmas</p>
-                      <p className="text-[7pt] font-black text-black uppercase leading-none">Pasar Minggu</p>
+                      <p className="text-[6pt] font-black text-gray-500 uppercase leading-none">Puskesmas</p>
+                      <p className="text-[7pt] font-black text-black uppercase">Pasar Minggu</p>
                     </div>
                  </div>
                  
-                 <div className="flex gap-5 items-center flex-1 relative z-10 bg-white">
-                    <div className="bg-white p-1.5 border-[2pt] border-black rounded-2xl shrink-0">
-                       <QRCode value={getQrValue(patientToDisplay.id)} size={70} fgColor="#000000" />
+                 <div className="flex gap-5 items-center flex-1">
+                    <div className="bg-white p-1 border-[1.5pt] border-black rounded-xl">
+                       <QRCode value={getQrValue(patientToDisplay.id)} size={75} fgColor="#000000" />
                     </div>
-                    <div className="flex-1 space-y-2.5 min-w-0 bg-white">
-                       <div className="space-y-0.5">
-                          <p className="text-[6pt] font-black text-gray-500 uppercase tracking-widest">Nama Pasien</p>
-                          <p className="text-[12pt] font-black text-black uppercase truncate leading-none">{patientToDisplay.name}</p>
+                    <div className="flex-1 space-y-2">
+                       <div>
+                          <p className="text-[6pt] font-black text-gray-400 uppercase tracking-widest">Nama Pasien</p>
+                          <p className="text-[11pt] font-black text-black uppercase leading-tight truncate">{patientToDisplay.name}</p>
                        </div>
-                       <div className="space-y-0.5">
-                          <p className="text-[6pt] font-black text-gray-500 uppercase tracking-widest">ID Pasien</p>
-                          <p className="text-[10pt] font-black text-black uppercase leading-none">{patientToDisplay.id}</p>
-                       </div>
-                       <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-200 bg-white">
-                          <div>
-                            <p className="text-[5pt] font-black text-gray-500 uppercase">HPHT</p>
-                            <p className="text-[8pt] font-black text-black">{patientToDisplay.hpht || '-'}</p>
-                          </div>
-                          <div>
-                            <p className="text-[5pt] font-black text-gray-500 uppercase">Gravida</p>
-                            <p className="text-[8pt] font-black text-black">G{patientToDisplay.pregnancyNumber} P{patientToDisplay.parityP}</p>
-                          </div>
+                       <div>
+                          <p className="text-[6pt] font-black text-gray-400 uppercase tracking-widest">ID Pasien</p>
+                          <p className="text-[10pt] font-black text-black">{patientToDisplay.id}</p>
                        </div>
                     </div>
                  </div>
                  
-                 <div className="mt-3 pt-2 border-t-[1.5pt] border-black flex justify-between items-center relative z-10 bg-white">
-                    <div className="flex items-center gap-1.5">
-                      <CheckCircle size={8} className="text-black" />
-                      <span className="text-[7pt] font-black text-black uppercase tracking-tight">Valid & Terverifikasi</span>
+                 <div className="mt-2 pt-2 border-t-[1pt] border-black flex justify-between items-center">
+                    <div className="flex items-center gap-1">
+                      <CheckCircle size={8} />
+                      <span className="text-[6pt] font-black uppercase">Valid & Terverifikasi Digital</span>
                     </div>
-                    <p className="text-[6pt] font-black text-gray-300 uppercase">Smart ANC Digital System</p>
+                    <p className="text-[5pt] font-black text-gray-400 uppercase tracking-widest">Smart ANC System</p>
                  </div>
               </div>
 
-              {/* BACK SIDE - ABSOLUTE WHITE */}
-              <div className="w-[85.6mm] h-[54mm] bg-white border-[2pt] border-black rounded-[12pt] relative flex flex-col p-6 shadow-none overflow-hidden">
-                 <div className="mb-4 pb-2.5 border-b border-gray-200 flex items-center justify-between bg-white">
-                    <h3 className="text-[10pt] font-black uppercase tracking-widest text-black">Instruksi Layanan</h3>
-                    <Phone size={14} className="text-gray-400" />
+              {/* SISI BELAKANG KARTU */}
+              <div className="card-container w-[85.6mm] h-[54mm] bg-white border-[2pt] border-black rounded-[12pt] flex flex-col p-6 relative overflow-hidden">
+                 <div className="mb-4 pb-2 border-b border-gray-200">
+                    <h3 className="text-[9pt] font-black uppercase tracking-widest">Instruksi & Layanan</h3>
                  </div>
 
-                 <div className="space-y-3 flex-1 bg-white">
-                    <div className="flex items-start gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-black mt-1.5 shrink-0" />
-                      <p className="text-[8.5pt] font-bold text-black leading-tight uppercase">Bawa kartu ini setiap melakukan pemeriksaan kehamilan (ANC) di Puskesmas atau RS.</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-black mt-1.5 shrink-0" />
-                      <p className="text-[8.5pt] font-bold text-black leading-tight uppercase">Scan Barcode di kartu ini untuk melihat riwayat medis lengkap secara instan.</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-black mt-1.5 shrink-0" />
-                      <p className="text-[8.5pt] font-bold text-black leading-tight uppercase">Pantau status kehamilan melalui Aplikasi Smart ANC.</p>
-                    </div>
+                 <div className="space-y-3 flex-1">
+                    <p className="text-[7pt] font-bold text-black uppercase leading-tight">• Bawa kartu ini setiap melakukan pemeriksaan kehamilan (ANC).</p>
+                    <p className="text-[7pt] font-bold text-black uppercase leading-tight">• Scan QR Code di kartu ini untuk melihat riwayat medis lengkap secara instan.</p>
+                    <p className="text-[7pt] font-bold text-black uppercase leading-tight">• Hubungi {PUSKESMAS_INFO.phone} jika terjadi tanda bahaya kehamilan.</p>
                  </div>
 
-                 <div className="mt-3 pt-2.5 border-t border-gray-200 text-center bg-white">
-                    <p className="text-[8.5pt] font-black text-black uppercase tracking-[0.15em] mb-1">{PUSKESMAS_INFO.name}</p>
-                    <p className="text-[6pt] font-bold text-gray-400 uppercase italic tracking-widest">Digital Health Persistent ID</p>
+                 <div className="mt-2 pt-2 border-t border-gray-100 text-center">
+                    <p className="text-[7pt] font-black uppercase">{PUSKESMAS_INFO.name}</p>
+                    <p className="text-[5pt] font-bold text-gray-400 uppercase italic">Digital Health Identification</p>
                  </div>
               </div>
-              
-              <div className="text-center pt-8 border-t border-dashed border-gray-200 w-full bg-white">
-                <p className="text-[10pt] font-black text-gray-300 uppercase tracking-widest">Gunting tepat sesuai garis tepi hitam kartu di atas.</p>
+
+              <div className="w-full text-center mt-10">
+                <p className="text-[10pt] font-black text-gray-300 uppercase tracking-widest">Gunting Sesuai Garis Tepi Hitam Kartu.</p>
               </div>
             </div>
           </div>
 
-          {/* SINGLE ACTION BUTTON: SIMPAN KARTU */}
+          {/* HANYA SATU TOMBOL: SIMPAN KARTU */}
           <div className="no-print px-4">
             <button 
               onClick={handleSaveCard} 
@@ -206,7 +165,7 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
               <Save size={24} className="group-hover:rotate-12 transition-transform" /> SIMPAN KARTU ANC PINTAR
             </button>
             <p className="text-center mt-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              Kartu akan disimpan sebagai asset digital (barcode) untuk akses rekam medis.
+              Gunakan Barcode pada kartu untuk akses cepat riwayat medis oleh Tenaga Kesehatan.
             </p>
           </div>
         </div>
@@ -225,7 +184,7 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
   );
 };
 
-// Modul Edukasi (Tetap sama)
+// ... (EducationModule dan ContactModule tetap sama)
 export const EducationModule = () => {
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
 
@@ -327,21 +286,7 @@ export const EducationModule = () => {
   );
 };
 
-// Modul Kontak (Tetap sama)
 export const ContactModule = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleFeedbackSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitted(true);
-      setTimeout(() => setSubmitted(false), 5000);
-    }, 1500);
-  };
-
   return (
     <div className="max-w-4xl mx-auto space-y-12 animate-in fade-in duration-700">
       <div className="bg-red-600 p-12 md:p-24 rounded-[4rem] md:rounded-[6rem] text-white shadow-2xl relative overflow-hidden text-center">
@@ -369,7 +314,6 @@ export const ContactModule = () => {
   );
 };
 
-// Modul Akses Ditolak
 export const AccessDenied = () => (
   <div className="p-20 text-center animate-in zoom-in duration-500">
     <div className="bg-red-50 p-16 rounded-[4rem] border-4 border-dashed border-red-200">
