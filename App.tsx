@@ -65,7 +65,6 @@ export default function App() {
         if (parsed.users && Array.isArray(parsed.users)) {
            if (!parsed.userChecklists) parsed.userChecklists = {};
            if (!parsed.ancVisits || parsed.ancVisits.length === 0) parsed.ancVisits = MOCK_ANC_VISITS;
-           // Added currentView initialization to satisfy the AppState interface during hydration
            if (!parsed.currentView) parsed.currentView = 'dashboard';
            return parsed; 
         }
@@ -79,7 +78,6 @@ export default function App() {
       selectedPatientId: null,
       logs: [{ id: 'l1', timestamp: new Date().toISOString(), userId: 'system', userName: 'System', action: 'INIT', module: 'CORE', details: 'Database Smart ANC Berhasil Dimuat' }],
       userChecklists: {},
-      // Added initial currentView value for default state
       currentView: 'dashboard'
     };
   });
@@ -89,7 +87,6 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 1024);
   const [patientSearch, setPatientSearch] = useState('');
 
-  // SINKRONISASI KE LOCAL STORAGE
   useEffect(() => {
     setIsSyncing(true);
     const dataToSave = { ...state, currentUser, currentView: view };
@@ -98,7 +95,6 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [state, currentUser, view]);
 
-  // FITUR AUTO-SCAN: Mendeteksi PID di URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const scannedPid = params.get('pid');
@@ -107,7 +103,6 @@ export default function App() {
       const exists = state.users.find(u => u.id === scannedPid);
       if (exists) {
         setViewingPatientProfile(scannedPid);
-        // Bersihkan URL agar tidak trigger berulang
         window.history.replaceState({}, document.title, window.location.pathname);
         showNotification(`Profil ${exists.name} terbuka otomatis via Scan QR`);
       }
@@ -711,22 +706,23 @@ export default function App() {
             <PatientList users={state.users} visits={state.ancVisits} onEdit={(u) => { setEditingPatient(u); setTempRiskFactors(u.selectedRiskFactors); setView('register'); }} onAddVisit={(u) => { setIsAddingVisit(u); setVisitPreviewData({ bloodPressure: '120/80', dangerSigns: [], fetalMovement: 'Normal', djj: 140 }); }} onViewProfile={(id) => setViewingPatientProfile(id)} onDeletePatient={(id) => { if(window.confirm('Hapus permanen?')) setState(prev => ({...prev, users: prev.users.filter(u => u.id !== id)})) }} onDeleteVisit={handleDeleteVisit} onToggleVisitStatus={() => {}} onRecordDelivery={(u) => setRecordingDelivery(u)} onStartNewPregnancy={(u) => setStartingNewPregnancy(u)} currentUserRole={currentUser.role} searchFilter={patientSearch} />
           )}
 
+          {/* MODAL: CATAT KELAHIRAN - OPTIMIZED FOR MOBILE */}
           {recordingDelivery && (
-            <div className="fixed inset-0 z-[120] bg-indigo-950/90 backdrop-blur-2xl flex items-center justify-center p-4">
-              <div className="bg-white w-full max-w-3xl rounded-[3rem] shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
-                <div className="bg-indigo-600 p-10 text-white text-center relative">
+            <div className="fixed inset-0 z-[120] bg-indigo-950/90 backdrop-blur-2xl flex items-center justify-center p-4 overflow-y-auto">
+              <div className="bg-white w-full max-w-3xl rounded-[2.5rem] md:rounded-[3rem] shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden my-auto">
+                <div className="bg-indigo-600 p-8 md:p-12 text-white text-center relative">
                   <PartyPopper className="mx-auto mb-4" size={48} />
-                  <h3 className="text-3xl font-black uppercase tracking-tighter">Catat Kelahiran</h3>
+                  <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">Catat Kelahiran</h3>
                   <p className="text-indigo-200 font-bold uppercase text-[10px] tracking-widest mt-2">Ibu {recordingDelivery.name}</p>
-                  <button onClick={() => setRecordingDelivery(null)} className="absolute top-8 right-8 text-white/50 hover:text-white transition-colors"><X/></button>
+                  <button onClick={() => setRecordingDelivery(null)} className="absolute top-6 right-6 md:top-8 md:right-8 text-white/50 hover:text-white transition-colors"><X/></button>
                 </div>
-                <form onSubmit={handleDeliverySubmit} className="p-10 space-y-6">
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-1">
+                <form onSubmit={handleDeliverySubmit} className="p-6 md:p-12 space-y-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
+                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Nama Bayi (Opsional)</label>
                       <input name="babyName" placeholder="Contoh: Muhammad Yusuf" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-bold outline-none focus:ring-4 focus:ring-indigo-100" />
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Jenis Kelamin</label>
                       <select name="babyGender" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required>
                         <option value="L">LAKI-LAKI</option>
@@ -735,23 +731,23 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-6">
-                    <div className="space-y-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8">
+                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Tanggal Lahir</label>
                       <input type="date" name="deliveryDate" defaultValue={new Date().toISOString().split('T')[0]} className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required />
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 flex items-center gap-1"><Scale size={12}/> Berat (g)</label>
                       <input type="number" name="babyWeight" placeholder="Contoh: 3100" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required />
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 flex items-center gap-1"><Ruler size={12}/> Tinggi (cm)</label>
                       <input type="number" name="babyHeight" placeholder="Contoh: 50" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
+                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Status Ibu</label>
                       <select name="motherStatus" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required>
                         <option value="SEHAT">SEHAT / STABIL</option>
@@ -759,7 +755,7 @@ export default function App() {
                         <option value="MENINGGAL">MENINGGAL DUNIA</option>
                       </select>
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Status Bayi</label>
                       <select name="babyStatus" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required>
                         <option value="HIDUP_SEHAT">HIDUP & SEHAT</option>
@@ -769,12 +765,12 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Keterangan Tambahan</label>
                     <textarea name="condition" placeholder="Tuliskan catatan persalinan..." className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-bold outline-none focus:ring-4 focus:ring-indigo-100" rows={2}></textarea>
                   </div>
 
-                  <button type="submit" className="w-full py-5 bg-indigo-600 text-white rounded-[2rem] font-black uppercase text-xs tracking-widest shadow-xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-3"><Save size={18}/> Simpan Rekam Medis & Arsipkan Pasien</button>
+                  <button type="submit" className="w-full py-6 bg-indigo-600 text-white rounded-[2rem] font-black uppercase text-xs tracking-widest shadow-xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-3"><Save size={18}/> Simpan Rekam Medis & Arsipkan Pasien</button>
                 </form>
               </div>
             </div>
@@ -801,7 +797,7 @@ export default function App() {
                       <p className="text-[10px] font-bold text-indigo-700 leading-relaxed uppercase mt-1">Data kelahiran sebelumnya akan diarsipkan secara otomatis. Nilai Gravida (G) akan meningkat menjadi G{startingNewPregnancy.pregnancyNumber + 1}.</p>
                     </div>
                   </div>
-                  <div className="flex gap-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
                     <button type="submit" className="flex-1 py-6 bg-indigo-600 text-white rounded-[2.5rem] font-black uppercase text-xs tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center justify-center gap-3"><Sparkles size={18}/> Aktifkan Pemantauan</button>
                     <button type="button" onClick={() => setStartingNewPregnancy(null)} className="px-10 py-6 bg-gray-100 text-gray-500 rounded-[2.5rem] font-black uppercase text-xs tracking-widest">Batal</button>
                   </div>
@@ -810,49 +806,260 @@ export default function App() {
             </div>
           )}
 
+          {/* VIEW: PENDAFTARAN ANC - OPTIMIZED GRID FOR MOBILE */}
           {view === 'register' && currentUser.role !== UserRole.USER && (
-            <div className="max-w-5xl mx-auto space-y-10 animate-in zoom-in-95">
-              <div className="bg-white p-12 lg:p-20 rounded-[4rem] shadow-sm border border-gray-100">
+            <div className="max-w-5xl mx-auto space-y-12 animate-in zoom-in-95">
+              <div className="bg-white p-8 md:p-16 lg:p-20 rounded-[3rem] md:rounded-[4rem] shadow-sm border border-gray-100">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-10 mb-16">
-                  <div className="flex items-center gap-8"><div className="bg-indigo-600 p-6 rounded-[2.5rem] text-white shadow-2xl shrink-0"><UserPlus size={28} /></div><div><h2 className="text-4xl font-black text-gray-900 uppercase tracking-tighter leading-tight">{editingPatient ? 'Perbarui Profil' : 'Registrasi Baru'}</h2><p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] mt-2">Sistem Monitoring ANC Terpadu</p></div></div>
-                  <div className={`px-10 py-5 rounded-[2rem] border-4 flex items-center gap-5 transition-all duration-700 shadow-xl ${currentRegisterRisk.color}`}><div className="text-left"><p className="text-[9px] font-black uppercase opacity-60 tracking-widest">Triase Live Prediction</p><p className="text-lg font-black uppercase tracking-tighter">{currentRegisterRisk.label}</p></div><Activity size={24} className="animate-pulse shrink-0" /></div>
+                  <div className="flex flex-col md:flex-row items-center text-center md:text-left gap-6 md:gap-8">
+                    <div className="bg-indigo-600 p-6 rounded-[2.5rem] text-white shadow-2xl shrink-0">
+                      <UserPlus size={28} />
+                    </div>
+                    <div>
+                      <h2 className="text-3xl md:text-4xl font-black text-gray-900 uppercase tracking-tighter leading-tight">{editingPatient ? 'Perbarui Profil' : 'Registrasi Baru'}</h2>
+                      <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] mt-2">Sistem Monitoring ANC Terpadu</p>
+                    </div>
+                  </div>
+                  <div className={`w-full md:w-auto px-10 py-5 rounded-[2rem] border-4 flex items-center justify-between md:justify-start gap-5 transition-all duration-700 shadow-xl ${currentRegisterRisk.color}`}>
+                    <div className="text-left">
+                      <p className="text-[9px] font-black uppercase opacity-60 tracking-widest">Triase Live Prediction</p>
+                      <p className="text-lg font-black uppercase tracking-tighter">{currentRegisterRisk.label}</p>
+                    </div>
+                    <Activity size={24} className="animate-pulse shrink-0" />
+                  </div>
                 </div>
+
                 <form onSubmit={handleRegisterSubmit} className="space-y-16">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                    <div className="space-y-2"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-6">Nama Lengkap</label><input name="name" defaultValue={editingPatient?.name} className="w-full px-6 py-4 bg-gray-50 border-none rounded-[1.5rem] font-bold outline-none focus:ring-8 focus:ring-indigo-100 transition-all" required /></div>
-                    <div className="space-y-2"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-6">Tanggal Lahir</label><input type="date" name="dob" defaultValue={editingPatient?.dob} className="w-full px-6 py-4 bg-gray-50 border-none rounded-[1.5rem] font-bold outline-none focus:ring-8 focus:ring-indigo-100 transition-all" required /></div>
-                    <div className="space-y-2"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-6">Nomor WhatsApp</label><input type="tel" name="phone" defaultValue={editingPatient?.phone} className="w-full px-6 py-4 bg-gray-50 border-none rounded-[1.5rem] font-bold outline-none focus:ring-8 focus:ring-indigo-100 transition-all" required /></div>
+                  {/* Identitas Section */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 md:gap-10">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-6">Nama Lengkap</label>
+                      <input name="name" defaultValue={editingPatient?.name} className="w-full px-6 py-4 bg-gray-50 border-none rounded-[1.5rem] font-bold outline-none focus:ring-8 focus:ring-indigo-100 transition-all" required />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-6">Tanggal Lahir</label>
+                      <input type="date" name="dob" defaultValue={editingPatient?.dob} className="w-full px-6 py-4 bg-gray-50 border-none rounded-[1.5rem] font-bold outline-none focus:ring-8 focus:ring-indigo-100 transition-all" required />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-6">Nomor WhatsApp</label>
+                      <input type="tel" name="phone" defaultValue={editingPatient?.phone} className="w-full px-6 py-4 bg-gray-50 border-none rounded-[1.5rem] font-bold outline-none focus:ring-8 focus:ring-indigo-100 transition-all" required />
+                    </div>
                   </div>
-                  <div className="bg-indigo-50/50 p-10 rounded-[3.5rem] border border-indigo-100 relative overflow-hidden"><h4 className="text-sm font-black text-indigo-900 uppercase tracking-[0.3em] mb-10 flex items-center gap-3 relative z-10"><Baby size={18} /> Parameter Kehamilan Utama</h4><div className="grid grid-cols-2 md:grid-cols-4 gap-8 relative z-10">
-                      <div className="space-y-2"><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-4">HPHT</label><input type="date" name="hpht" defaultValue={editingPatient?.hpht} className="w-full px-8 py-5 bg-white border border-indigo-100 rounded-[1.5rem] font-black outline-none focus:ring-8 focus:ring-indigo-200 transition-all" required /></div>
-                      <div className="space-y-2"><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-4">Gravida (G)</label><input type="number" name="gravida" defaultValue={editingPatient?.pregnancyNumber} className="w-full px-8 py-5 bg-white border border-indigo-100 rounded-[1.5rem] font-black outline-none focus:ring-8 focus:ring-indigo-200 transition-all" required /></div>
-                      <div className="space-y-2"><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-4">Para (P)</label><input type="number" name="para" defaultValue={editingPatient?.parityP} className="w-full px-8 py-5 bg-white border border-indigo-100 rounded-[1.5rem] font-black outline-none focus:ring-8 focus:ring-indigo-200 transition-all" required /></div>
-                      <div className="space-y-2"><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-4">Abortus (A)</label><input type="number" name="abortus" defaultValue={editingPatient?.parityA} className="w-full px-8 py-5 bg-white border border-indigo-100 rounded-[1.5rem] font-black outline-none focus:ring-8 focus:ring-indigo-200 transition-all" required /></div>
-                    </div></div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    <div className="space-y-8"><h4 className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-3"><MapPin size={18} /> Data Domisili</h4><textarea name="address" rows={3} defaultValue={editingPatient?.address} className="w-full px-6 py-4 bg-gray-50 border-none rounded-[2rem] font-bold outline-none focus:ring-8 focus:ring-indigo-100 transition-all" placeholder="Alamat Lengkap..." required />
-                      <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2"><label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-4">Kecamatan</label><select name="kecamatan" className="w-full px-5 py-4 bg-gray-50 border-none rounded-[1.5rem] font-black text-xs outline-none"><option value="Pasar Minggu">Pasar Minggu</option></select></div>
-                        <div className="space-y-2"><label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-4">Kelurahan</label><select name="kelurahan" defaultValue={editingPatient?.kelurahan} className="w-full px-5 py-4 bg-gray-50 border-none rounded-[1.5rem] font-black text-xs outline-none">{WILAYAH_DATA["Pasar Minggu"].map(kel => <option key={kel} value={kel}>{kel}</option>)}</select></div>
-                      </div></div>
-                    <div className="space-y-8"><div className="flex justify-between items-center"><h4 className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-3"><NavIcon size={18} /> Koordinat Geospasial</h4><button type="button" onClick={getCurrentLocation} className="px-5 py-2.5 bg-indigo-50 text-indigo-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-sm flex items-center gap-2">{isGettingLocation ? <RefreshCw size={12} className="animate-spin" /> : <Crosshair size={12} />} Tag Lokasi</button></div>
-                      <div className="grid grid-cols-2 gap-6"><div className="space-y-2"><label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-4">Latitude</label><input name="lat" value={formCoords.lat} onChange={(e) => setFormCoords({...formCoords, lat: e.target.value})} className="w-full px-5 py-4 bg-gray-50 border-none rounded-[1.5rem] font-black text-xs outline-none" /></div><div className="space-y-2"><label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-4">Longitude</label><input name="lng" value={formCoords.lng} onChange={(e) => setFormCoords({...formCoords, lng: e.target.value})} className="w-full px-5 py-4 bg-gray-50 border-none rounded-[1.5rem] font-black text-xs outline-none" /></div></div></div>
+
+                  {/* Parameter Kehamilan Section */}
+                  <div className="bg-indigo-50/50 p-8 md:p-10 rounded-[3.5rem] border border-indigo-100 relative overflow-hidden">
+                    <h4 className="text-xs md:text-sm font-black text-indigo-900 uppercase tracking-[0.3em] mb-10 flex items-center gap-3 relative z-10">
+                      <Baby size={18} /> Parameter Kehamilan Utama
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 relative z-10">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-4">HPHT</label>
+                        <input type="date" name="hpht" defaultValue={editingPatient?.hpht} className="w-full px-8 py-5 bg-white border border-indigo-100 rounded-[1.5rem] font-black outline-none focus:ring-8 focus:ring-indigo-200 transition-all" required />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-4">Gravida (G)</label>
+                        <input type="number" name="gravida" defaultValue={editingPatient?.pregnancyNumber} className="w-full px-8 py-5 bg-white border border-indigo-100 rounded-[1.5rem] font-black outline-none focus:ring-8 focus:ring-indigo-200 transition-all" required />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-4">Para (P)</label>
+                        <input type="number" name="para" defaultValue={editingPatient?.parityP} className="w-full px-8 py-5 bg-white border border-indigo-100 rounded-[1.5rem] font-black outline-none focus:ring-8 focus:ring-indigo-200 transition-all" required />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-4">Abortus (A)</label>
+                        <input type="number" name="abortus" defaultValue={editingPatient?.parityA} className="w-full px-8 py-5 bg-white border border-indigo-100 rounded-[1.5rem] font-black outline-none focus:ring-8 focus:ring-indigo-200 transition-all" required />
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-8"><label className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-3 ml-4"><ShieldAlert size={18} /> Penapisan Faktor Resiko (Skor SPR)</label><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">{Object.entries(RISK_FACTORS_MASTER).map(([id, info]) => (<label key={id} className={`flex items-start gap-5 p-6 rounded-[2rem] border-4 transition-all cursor-pointer group hover:scale-[1.01] ${tempRiskFactors.includes(id) ? 'bg-indigo-50 border-indigo-600 shadow-xl' : 'bg-gray-50 border-transparent'}`}><input type="checkbox" className="mt-1 accent-indigo-600 w-5 h-5 shrink-0" checked={tempRiskFactors.includes(id)} onChange={(e) => { if (e.target.checked) setTempRiskFactors([...tempRiskFactors, id]); else setTempRiskFactors(tempRiskFactors.filter(f => f !== id)); }} /><div className="min-w-0"><p className="text-xs font-black text-gray-900 leading-tight uppercase group-hover:text-indigo-600 transition-colors line-clamp-2">{info.label}</p><p className="text-[10px] font-black text-indigo-400 mt-2 tracking-widest">+{info.score} Poin Risiko</p></div></label>))}</div></div>
-                  <div className="pt-16 border-t border-gray-100 flex flex-col md:flex-row gap-8"><button type="submit" className="w-full md:flex-1 py-7 bg-indigo-600 text-white rounded-[2.5rem] font-black uppercase text-sm tracking-[0.3em] shadow-2xl hover:scale-105 transition-all">Simpan Rekam Medis</button><button type="button" onClick={() => handleNavigate('patients')} className="w-full md:px-16 py-7 bg-gray-100 text-gray-500 rounded-[2.5rem] font-black uppercase text-sm tracking-widest hover:bg-gray-200 transition-all">Batalkan</button></div>
+
+                  {/* Alamat & Lokasi Section */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
+                    <div className="space-y-8">
+                      <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-3"><MapPin size={18} /> Data Domisili</h4>
+                      <textarea name="address" rows={3} defaultValue={editingPatient?.address} className="w-full px-6 py-4 bg-gray-50 border-none rounded-[2rem] font-bold outline-none focus:ring-8 focus:ring-indigo-100 transition-all" placeholder="Alamat Lengkap..." required />
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-4">Kecamatan</label>
+                          <select name="kecamatan" className="w-full px-5 py-4 bg-gray-50 border-none rounded-[1.5rem] font-black text-xs outline-none">
+                            <option value="Pasar Minggu">Pasar Minggu</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-4">Kelurahan</label>
+                          <select name="kelurahan" defaultValue={editingPatient?.kelurahan} className="w-full px-5 py-4 bg-gray-50 border-none rounded-[1.5rem] font-black text-xs outline-none">
+                            {WILAYAH_DATA["Pasar Minggu"].map(kel => <option key={kel} value={kel}>{kel}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-8">
+                      <div className="flex justify-between items-center">
+                        <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-3"><NavIcon size={18} /> Koordinat Geospasial</h4>
+                        <button type="button" onClick={getCurrentLocation} className="px-5 py-2.5 bg-indigo-50 text-indigo-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-sm flex items-center gap-2">
+                          {isGettingLocation ? <RefreshCw size={12} className="animate-spin" /> : <Crosshair size={12} />} Tag Lokasi
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-4">Latitude</label>
+                          <input name="lat" value={formCoords.lat} onChange={(e) => setFormCoords({...formCoords, lat: e.target.value})} className="w-full px-5 py-4 bg-gray-50 border-none rounded-[1.5rem] font-black text-xs outline-none" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-4">Longitude</label>
+                          <input name="lng" value={formCoords.lng} onChange={(e) => setFormCoords({...formCoords, lng: e.target.value})} className="w-full px-5 py-4 bg-gray-50 border-none rounded-[1.5rem] font-black text-xs outline-none" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Penapisan Risiko Section */}
+                  <div className="space-y-10">
+                    <label className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-3 ml-4">
+                      <ShieldAlert size={18} /> Penapisan Faktor Resiko (Skor SPR)
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {Object.entries(RISK_FACTORS_MASTER).map(([id, info]) => (
+                        <label key={id} className={`flex items-start gap-5 p-6 rounded-[2rem] border-4 transition-all cursor-pointer group hover:scale-[1.01] ${tempRiskFactors.includes(id) ? 'bg-indigo-50 border-indigo-600 shadow-xl' : 'bg-gray-50 border-transparent'}`}>
+                          <input type="checkbox" className="mt-1 accent-indigo-600 w-5 h-5 shrink-0" checked={tempRiskFactors.includes(id)} onChange={(e) => { if (e.target.checked) setTempRiskFactors([...tempRiskFactors, id]); else setTempRiskFactors(tempRiskFactors.filter(f => f !== id)); }} />
+                          <div className="min-w-0">
+                            <p className="text-xs font-black text-gray-900 leading-tight uppercase group-hover:text-indigo-600 transition-colors line-clamp-2">{info.label}</p>
+                            <p className="text-[10px] font-black text-indigo-400 mt-2 tracking-widest">+{info.score} Poin Risiko</p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Actions Section */}
+                  <div className="pt-16 border-t border-gray-100 flex flex-col sm:flex-row gap-6 md:gap-8">
+                    <button type="submit" className="w-full sm:flex-1 py-7 bg-indigo-600 text-white rounded-[2.5rem] font-black uppercase text-sm tracking-[0.3em] shadow-2xl hover:scale-105 transition-all">Simpan Rekam Medis</button>
+                    <button type="button" onClick={() => handleNavigate('patients')} className="w-full sm:px-16 py-7 bg-gray-100 text-gray-500 rounded-[2.5rem] font-black uppercase text-sm tracking-widest hover:bg-gray-200 transition-all">Batalkan</button>
+                  </div>
                 </form>
               </div>
             </div>
           )}
+
+          {/* MODAL: INPUT ANC - OPTIMIZED FOR MOBILE SPACING */}
           {(isAddingVisit || editingVisit) && (
-            <div className="fixed inset-0 z-[100] bg-indigo-950/80 backdrop-blur-2xl flex items-start justify-center p-2 md:p-10 overflow-y-auto"><div className="bg-white w-full max-w-5xl rounded-[1.5rem] md:rounded-[4.5rem] shadow-2xl my-4 md:my-auto animate-in zoom-in-95 duration-700 relative flex flex-col"><div className="bg-indigo-600 p-6 md:p-16 text-white flex flex-col md:flex-row justify-between items-center gap-6 shrink-0 relative overflow-hidden rounded-t-[4.5rem]"><div className="relative z-10 text-center md:text-left"><h2 className="text-4xl font-black uppercase tracking-tighter">{editingVisit ? 'Edit Riwayat' : 'Input ANC'}</h2><p className="text-indigo-200 font-bold text-xs uppercase tracking-[0.3em] mt-2">Ibu {(isAddingVisit || editingVisit?.patient)!.name}</p></div><div className={`relative z-10 px-8 py-4 rounded-[2rem] flex items-center gap-4 border-4 shadow-2xl ${liveTriase?.color}`}><div className="text-left"><p className="text-[10px] font-black uppercase opacity-60 tracking-widest">Triase Live</p><p className="text-lg font-black uppercase tracking-tighter">{liveTriase?.label}</p></div><ShieldAlert size={32} className={liveTriase?.label === 'HITAM' ? 'animate-pulse' : ''} /></div><button onClick={() => {setIsAddingVisit(null); setEditingVisit(null);}} className="relative z-10 p-5 bg-white/10 hover:bg-white/20 rounded-xl md:rounded-2xl transition-all"><X size={18}/></button><Activity size={180} className="absolute -left-10 -bottom-10 opacity-5" /></div><form onSubmit={handleVisitSubmit} className="p-6 md:p-20 space-y-16"><div className="grid grid-cols-2 md:grid-cols-5 gap-8">
-                      <div className="space-y-3"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">BB (kg)</label><input name="weight" type="number" step="0.1" defaultValue={editingVisit?.visit.weight} className="w-full p-6 bg-gray-50 border-none rounded-2xl font-black text-lg outline-none focus:ring-8 focus:ring-indigo-50" required /></div>
-                      <div className="space-y-3"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">TD (mmHg)</label><input name="bp" placeholder="120/80" defaultValue={editingVisit?.visit.bloodPressure} className="w-full p-6 bg-gray-50 border-none rounded-2xl font-black text-lg outline-none focus:ring-8 focus:ring-indigo-50" required onChange={(e) => setVisitPreviewData(prev => ({ ...prev, bloodPressure: e.target.value }))} /></div>
-                      <div className="space-y-3"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">TFU (cm)</label><input name="tfu" type="number" step="0.1" defaultValue={editingVisit?.visit.tfu} className="w-full p-6 bg-gray-50 border-none rounded-2xl font-black text-lg outline-none focus:ring-8 focus:ring-indigo-50" required /></div>
-                      <div className="space-y-3"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">DJJ (x/m)</label><input name="djj" type="number" defaultValue={editingVisit?.visit.djj} className="w-full p-6 bg-gray-50 border-none rounded-2xl font-black text-lg outline-none focus:ring-8 focus:ring-indigo-50" required onChange={(e) => setVisitPreviewData(prev => ({ ...prev, djj: Number(e.target.value) }))} /></div>
-                      <div className="space-y-3 col-span-2 md:col-span-1"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Hb (g/dL)</label><input name="hb" type="number" step="0.1" defaultValue={editingVisit?.visit.hb} className="w-full p-6 bg-gray-50 border-none rounded-2xl font-black text-lg outline-none focus:ring-8 focus:ring-indigo-50" required /></div>
-                  </div><div className="grid grid-cols-1 md:grid-cols-2 gap-16"><div className="space-y-8"><h4 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] flex items-center gap-2"><AlertCircle size={16}/> Observasi Bahaya</h4><div className="grid grid-cols-2 gap-4">{['Perdarahan', 'Ketuban Pecah', 'Kejang', 'Pusing Hebat', 'Nyeri Perut Hebat', 'Demam'].map(s => (<label key={s} className="flex items-center gap-5 p-5 bg-gray-50 rounded-2xl hover:bg-red-50 transition-all cursor-pointer border-2 border-transparent hover:border-red-200 group"><input type="checkbox" name="dangerSigns" value={s} defaultChecked={editingVisit?.visit.dangerSigns.includes(s)} className="accent-red-600 w-5 h-5 shrink-0" onChange={(e) => { const current = visitPreviewData.dangerSigns || []; const updated = e.target.checked ? [...current, s] : current.filter(x => x !== s); setVisitPreviewData(prev => ({ ...prev, dangerSigns: updated })); }} /><span className="text-[10px] font-black text-gray-600 uppercase tracking-widest group-hover:text-red-600 truncate">{s}</span></label>))}</div></div><div className="space-y-8"><h4 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] flex items-center gap-2"><Baby size={16}/> Kondisi Janin</h4><div className="space-y-4"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Gerak Janin</label><select name="fetalMovement" defaultValue={editingVisit?.visit.fetalMovement || 'Normal'} className="w-full p-6 bg-gray-50 border-none rounded-2xl font-black text-sm outline-none focus:ring-8 focus:ring-indigo-50" onChange={(e) => setVisitPreviewData(prev => ({ ...prev, fetalMovement: e.target.value }))} required><option value="Normal">NORMAL / AKTIF</option><option value="Kurang Aktif">KURANG AKTIF</option><option value="Tidak Ada">TIDAK ADA (EMERGENCY)</option></select></div><div className="space-y-4"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Keluhan</label><textarea name="complaints" defaultValue={editingVisit?.visit.complaints} placeholder="Tuliskan jika ada..." className="w-full p-6 bg-gray-50 border-none rounded-[2rem] font-bold text-sm outline-none focus:ring-8 focus:ring-indigo-50" rows={3}></textarea></div></div></div><div className="grid grid-cols-1 md:grid-cols-2 gap-10 bg-indigo-50/50 p-10 rounded-[3.5rem] border border-indigo-100"><div className="space-y-6"><h4 className="text-xs font-black text-indigo-900 uppercase tracking-[0.3em] flex items-center gap-3"><ClipboardCheck size={16}/> Rencana (Plan)</h4><select name="followUp" defaultValue={editingVisit?.visit.followUp || 'ANC_RUTIN'} className="w-full p-6 bg-white border border-indigo-200 rounded-2xl font-black text-xs outline-none focus:ring-8 focus:ring-indigo-100" required><option value="ANC_RUTIN">KONTROL RUTIN</option><option value="KONSUL_DOKTER">KONSULTASI OBGYN</option><option value="RUJUK_RS">RUJUK RS (KRITIS)</option></select><textarea name="notes" defaultValue={editingVisit?.visit.nakesNotes} placeholder="Catatan Bidan..." className="w-full p-6 bg-white border border-indigo-200 rounded-[2rem] font-bold text-xs outline-none focus:ring-8 focus:ring-indigo-100" rows={3}></textarea></div><div className="space-y-6"><h4 className="text-xs font-black text-indigo-900 uppercase tracking-[0.3em] flex items-center gap-3"><Calendar size={16}/> Jadwal Ulang</h4><div className="space-y-2"><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-4">Kontrol Berikutnya</label><input type="date" name="nextVisit" defaultValue={editingVisit?.visit.nextVisitDate} className="w-full p-6 bg-white border border-indigo-200 rounded-2xl font-black outline-none text-base" required /></div><div className="p-8 bg-indigo-600 rounded-[2.5rem] text-white flex items-start gap-4 shadow-xl"><Info size={16} className="shrink-0" /><p className="text-[10px] font-black uppercase tracking-widest leading-relaxed">Pastikan hadir tepat waktu untuk menjaga kesehatan Ibu dan Buah Hati.</p></div></div></div><div className="flex flex-col md:flex-row gap-8 pb-4"><button type="submit" className="w-full md:flex-1 py-7 bg-indigo-600 text-white rounded-[2.5rem] font-black uppercase text-sm tracking-[0.3em] shadow-2xl transition-all"><Save size={18} className="inline mr-2"/> {editingVisit ? 'Simpan Perubahan' : 'Selesaikan'}</button><button type="button" onClick={() => {setIsAddingVisit(null); setEditingVisit(null);}} className="w-full md:py-7 px-16 bg-gray-100 text-gray-500 rounded-[2.5rem] font-black uppercase text-sm tracking-widest hover:bg-gray-200 transition-all">Batal</button></div></form></div></div>
+            <div className="fixed inset-0 z-[100] bg-indigo-950/80 backdrop-blur-2xl flex items-start justify-center p-2 md:p-10 overflow-y-auto">
+              <div className="bg-white w-full max-w-5xl rounded-[2.5rem] md:rounded-[4.5rem] shadow-2xl my-4 md:my-auto animate-in zoom-in-95 duration-700 relative flex flex-col overflow-hidden">
+                <div className="bg-indigo-600 p-8 md:p-16 text-white flex flex-col md:flex-row justify-between items-center gap-8 shrink-0 relative overflow-hidden">
+                  <div className="relative z-10 text-center md:text-left">
+                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter leading-none">{editingVisit ? 'Edit Riwayat' : 'Input ANC'}</h2>
+                    <p className="text-indigo-200 font-bold text-xs uppercase tracking-[0.3em] mt-3">Ibu {(isAddingVisit || editingVisit?.patient)!.name}</p>
+                  </div>
+                  <div className={`w-full md:w-auto relative z-10 px-8 py-5 rounded-[2.5rem] flex items-center justify-between md:justify-start gap-5 border-4 shadow-2xl ${liveTriase?.color}`}>
+                    <div className="text-left">
+                      <p className="text-[10px] font-black uppercase opacity-60 tracking-widest">Triase Live</p>
+                      <p className="text-lg font-black uppercase tracking-tighter">{liveTriase?.label}</p>
+                    </div>
+                    <ShieldAlert size={32} className={liveTriase?.label === 'HITAM' ? 'animate-pulse' : ''} />
+                  </div>
+                  <button onClick={() => {setIsAddingVisit(null); setEditingVisit(null);}} className="absolute top-6 right-6 md:top-10 md:right-10 p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all z-10"><X size={20}/></button>
+                  <Activity size={180} className="absolute -left-10 -bottom-10 opacity-5" />
+                </div>
+
+                <form onSubmit={handleVisitSubmit} className="p-8 md:p-20 space-y-16 overflow-y-auto">
+                  {/* Parameter Klinis Section */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8">
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">BB (kg)</label>
+                        <input name="weight" type="number" step="0.1" defaultValue={editingVisit?.visit.weight} className="w-full p-6 bg-gray-50 border-none rounded-2xl font-black text-lg outline-none focus:ring-8 focus:ring-indigo-50" required />
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">TD (mmHg)</label>
+                        <input name="bp" placeholder="120/80" defaultValue={editingVisit?.visit.bloodPressure} className="w-full p-6 bg-gray-50 border-none rounded-2xl font-black text-lg outline-none focus:ring-8 focus:ring-indigo-50" required onChange={(e) => setVisitPreviewData(prev => ({ ...prev, bloodPressure: e.target.value }))} />
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">TFU (cm)</label>
+                        <input name="tfu" type="number" step="0.1" defaultValue={editingVisit?.visit.tfu} className="w-full p-6 bg-gray-50 border-none rounded-2xl font-black text-lg outline-none focus:ring-8 focus:ring-indigo-50" required />
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">DJJ (x/m)</label>
+                        <input name="djj" type="number" defaultValue={editingVisit?.visit.djj} className="w-full p-6 bg-gray-50 border-none rounded-2xl font-black text-lg outline-none focus:ring-8 focus:ring-indigo-50" required onChange={(e) => setVisitPreviewData(prev => ({ ...prev, djj: Number(e.target.value) }))} />
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Hb (g/dL)</label>
+                        <input name="hb" type="number" step="0.1" defaultValue={editingVisit?.visit.hb} className="w-full p-6 bg-gray-50 border-none rounded-2xl font-black text-lg outline-none focus:ring-8 focus:ring-indigo-50" required />
+                      </div>
+                  </div>
+
+                  {/* Observasi & Kondisi Section */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20">
+                    <div className="space-y-10">
+                      <h4 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] flex items-center gap-2">
+                        <AlertCircle size={16}/> Observasi Bahaya
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {['Perdarahan', 'Ketuban Pecah', 'Kejang', 'Pusing Hebat', 'Nyeri Perut Hebat', 'Demam'].map(s => (
+                          <label key={s} className="flex items-center gap-5 p-5 bg-gray-50 rounded-2xl hover:bg-red-50 transition-all cursor-pointer border-2 border-transparent hover:border-red-200 group">
+                            <input type="checkbox" name="dangerSigns" value={s} defaultChecked={editingVisit?.visit.dangerSigns.includes(s)} className="accent-red-600 w-5 h-5 shrink-0" onChange={(e) => { const current = visitPreviewData.dangerSigns || []; const updated = e.target.checked ? [...current, s] : current.filter(x => x !== s); setVisitPreviewData(prev => ({ ...prev, dangerSigns: updated })); }} />
+                            <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest group-hover:text-red-600 truncate">{s}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-10">
+                      <h4 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] flex items-center gap-2">
+                        <Baby size={16}/> Kondisi Janin & Keluhan
+                      </h4>
+                      <div className="space-y-6">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Gerak Janin</label>
+                          <select name="fetalMovement" defaultValue={editingVisit?.visit.fetalMovement || 'Normal'} className="w-full p-6 bg-gray-50 border-none rounded-2xl font-black text-sm outline-none focus:ring-8 focus:ring-indigo-50" onChange={(e) => setVisitPreviewData(prev => ({ ...prev, fetalMovement: e.target.value }))} required>
+                            <option value="Normal">NORMAL / AKTIF</option>
+                            <option value="Kurang Aktif">KURANG AKTIF</option>
+                            <option value="Tidak Ada">TIDAK ADA (EMERGENCY)</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Keluhan Utama</label>
+                          <textarea name="complaints" defaultValue={editingVisit?.visit.complaints} placeholder="Tuliskan jika ada..." className="w-full p-6 bg-gray-50 border-none rounded-[2rem] font-bold text-sm outline-none focus:ring-8 focus:ring-indigo-50" rows={3}></textarea>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Plan & Jadwal Section */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 bg-indigo-50/50 p-8 md:p-14 rounded-[3.5rem] border border-indigo-100">
+                    <div className="space-y-8">
+                      <h4 className="text-xs font-black text-indigo-900 uppercase tracking-[0.3em] flex items-center gap-3"><ClipboardCheck size={16}/> Rencana (Plan)</h4>
+                      <div className="space-y-6">
+                        <select name="followUp" defaultValue={editingVisit?.visit.followUp || 'ANC_RUTIN'} className="w-full p-6 bg-white border border-indigo-200 rounded-2xl font-black text-xs outline-none focus:ring-8 focus:ring-indigo-100" required>
+                          <option value="ANC_RUTIN">KONTROL RUTIN</option>
+                          <option value="KONSUL_DOKTER">KONSULTASI OBGYN</option>
+                          <option value="RUJUK_RS">RUJUK RS (KRITIS)</option>
+                        </select>
+                        <textarea name="notes" defaultValue={editingVisit?.visit.nakesNotes} placeholder="Catatan Bidan..." className="w-full p-6 bg-white border border-indigo-200 rounded-[2rem] font-bold text-xs outline-none focus:ring-8 focus:ring-indigo-100" rows={3}></textarea>
+                      </div>
+                    </div>
+                    <div className="space-y-8">
+                      <h4 className="text-xs font-black text-indigo-900 uppercase tracking-[0.3em] flex items-center gap-3"><Calendar size={16}/> Jadwal Ulang</h4>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-4">Kontrol Berikutnya</label>
+                          <input type="date" name="nextVisit" defaultValue={editingVisit?.visit.nextVisitDate} className="w-full p-6 bg-white border border-indigo-200 rounded-2xl font-black outline-none text-base" required />
+                        </div>
+                        <div className="p-8 bg-indigo-600 rounded-[2.5rem] text-white flex items-start gap-4 shadow-xl">
+                          <Info size={16} className="shrink-0 mt-1" />
+                          <p className="text-[10px] font-black uppercase tracking-widest leading-relaxed">Penting: Ingatkan Ibu untuk tetap menjaga pola makan dan istirahat.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Submit Actions */}
+                  <div className="flex flex-col sm:flex-row gap-6 md:gap-8 pb-4">
+                    <button type="submit" className="w-full sm:flex-1 py-7 bg-indigo-600 text-white rounded-[2.5rem] font-black uppercase text-sm tracking-[0.3em] shadow-2xl transition-all">
+                      <Save size={18} className="inline mr-2"/> {editingVisit ? 'Simpan Perubahan' : 'Selesaikan Pemeriksaan'}
+                    </button>
+                    <button type="button" onClick={() => {setIsAddingVisit(null); setEditingVisit(null);}} className="w-full sm:py-7 px-16 bg-gray-100 text-gray-500 rounded-[2.5rem] font-black uppercase text-sm tracking-widest hover:bg-gray-200 transition-all">Batalkan</button>
+                  </div>
+                </form>
+              </div>
+            </div>
           )}
+
           {view === 'management' && <AccessManagement state={state} setState={setState} currentUser={currentUser!} addLog={addLog} onExport={handleExportSystemData} onImport={handleImportSystemData} />}
           {view === 'monitoring' && <RiskMonitoring state={state} onViewProfile={(id)=>setViewingPatientProfile(id)} onAddVisit={(u)=>setIsAddingVisit(u)} onToggleVisitStatus={()=>{}} />}
           {view === 'map' && <MapView users={state.users} visits={state.ancVisits} />}
@@ -861,7 +1068,7 @@ export default function App() {
           {view === 'contact' && <ContactModule />}
           {viewingPatientProfile && (
             <div className="fixed inset-0 z-[110] bg-indigo-950/90 backdrop-blur-3xl flex items-start justify-center p-2 md:p-12 overflow-y-auto pt-10 pb-10">
-              <div className="bg-gray-50 w-full max-w-7xl rounded-[4.5rem] shadow-2xl relative border-4 border-indigo-500/20 my-auto">
+              <div className="bg-gray-50 w-full max-w-7xl rounded-[2.5rem] md:rounded-[4.5rem] shadow-2xl relative border-4 border-indigo-500/20 my-auto">
                 <PatientProfileView 
                   patient={state.users.find(u => u.id === viewingPatientProfile)!} 
                   visits={state.ancVisits} 
