@@ -1,7 +1,7 @@
 
 export const RISK_FACTORS_MASTER: Record<string, {label: string, score: number, group: 'I' | 'II' | 'III', short: string}> = {
   // --- KELOMPOK I: ADA POTENSI GAWAT OBSTETRI (APGO) ---
-  // Skor 4
+  // Skor 4: Faktor risiko dasar yang perlu pemantauan
   'PR_TOO_YOUNG': { label: 'Terlalu Muda, Hamil I ≤ 16 Tahun', score: 4, group: 'I', short: 'Primi Muda' },
   'PR_TOO_OLD': { label: 'Terlalu Tua, Hamil I ≥ 35 Tahun', score: 4, group: 'I', short: 'Primi Tua' },
   'PR_SLOW': { label: 'Terlalu Lambat Hamil I, Kawin ≥ 4 Tahun', score: 4, group: 'I', short: 'Primi Tua Sekunder' },
@@ -11,10 +11,10 @@ export const RISK_FACTORS_MASTER: Record<string, {label: string, score: number, 
   'PR_TOO_OLD_MULTI': { label: 'Terlalu Tua, Umur ≥ 35 Tahun', score: 4, group: 'I', short: 'Multi Tua' },
   'PR_SHORT': { label: 'Terlalu Pendek (TB ≤ 145 cm)', score: 4, group: 'I', short: 'TB <145cm' },
   'PR_HISTORY_FAIL': { label: 'Pernah Gagal Kehamilan/Keguguran', score: 4, group: 'I', short: 'Riw. Abortus' },
-  'PR_CS_HISTORY': { label: 'Pernah Melahirkan Tarikan Tang/Vakum', score: 4, group: 'I', short: 'Riw. Persalinan Sulit' }, // Di KSPR ini masuk Kel 1 kadang
+  'PR_CS_HISTORY': { label: 'Pernah Melahirkan Tarikan Tang/Vakum', score: 4, group: 'I', short: 'Riw. Persalinan Sulit' },
 
   // --- KELOMPOK II: ADA GAWAT OBSTETRI (AGO) ---
-  // Skor 4
+  // Skor 4: Risiko medis penyerta
   'AGO_DISEASE': { label: 'Penyakit (Kurang Darah, Malaria, TBC, Payah Jantung, DM, PMS)', score: 4, group: 'II', short: 'Penyakit Ibu' },
   'AGO_PRE_ECLAMPSIA': { label: 'Bengkak pada Muka/Tungkai, Tekanan Darah Tinggi', score: 4, group: 'II', short: 'Preeklamsia Ringan' },
   'AGO_TWINS': { label: 'Hamil Kembar 2 atau Lebih', score: 4, group: 'II', short: 'Gemelli' },
@@ -23,12 +23,13 @@ export const RISK_FACTORS_MASTER: Record<string, {label: string, score: number, 
   'AGO_OVERDUE': { label: 'Kehamilan Lebih Bulan (> 42 Minggu)', score: 4, group: 'II', short: 'Post Date' },
   'AGO_BREECH': { label: 'Letak Sungsang', score: 4, group: 'II', short: 'Sungsang' },
   'AGO_TRANSVERSE': { label: 'Letak Lintang', score: 4, group: 'II', short: 'Lintang' },
-  'AGO_HISTORY_CS': { label: 'Riwayat Sesar (SC) Sebelumnya', score: 4, group: 'II', short: 'Riw. SC' },
+  // Skor 8: Riwayat Sesar (Risiko Ruptur Uteri) - Diperberat agar kombinasi dengan 1 faktor lain langsung MERAH (14)
+  'AGO_HISTORY_CS': { label: 'Riwayat Sesar (SC) Sebelumnya', score: 8, group: 'II', short: 'Riw. SC' },
 
   // --- KELOMPOK III: ADA GAWAT DARURAT OBSTETRI (AGDO) ---
-  // Skor 4 (Tapi Penanganan Khusus)
-  'AGDO_BLEEDING': { label: 'Perdarahan Dalam Kehamilan (APB)', score: 4, group: 'III', short: 'Perdarahan' },
-  'AGDO_ECLAMPSIA': { label: 'Kejang-Kejang (Eklampsia)', score: 4, group: 'III', short: 'Eklampsia' },
+  // Skor 10: AUTOMATIC KRST (Skor Dasar 2 + 10 = 12 -> Merah)
+  'AGDO_BLEEDING': { label: 'Perdarahan Dalam Kehamilan (APB)', score: 10, group: 'III', short: 'Perdarahan' },
+  'AGDO_ECLAMPSIA': { label: 'Kejang-Kejang (Eklampsia)', score: 10, group: 'III', short: 'Eklampsia' },
 };
 
 export const calculatePregnancyProgress = (hphtString: string) => {
@@ -86,6 +87,7 @@ export const getRiskCategory = (scoreFromFactors: number, currentAncData?: any) 
   // 2. KELOMPOK RISIKO BERDASARKAN SKOR PUJI ROCHJATI
   
   // KRST (KEHAMILAN RISIKO SANGAT TINGGI) - Skor >= 12
+  // Otomatis tercapai jika ada Kelompok III (Skor 10 + 2 = 12)
   if (total >= 12) {
     return { 
       label: 'MERAH', 
