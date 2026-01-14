@@ -8,7 +8,7 @@ import {
   UserPlus, Edit3, X, Clock, Baby, Trash2, ShieldCheck, LayoutDashboard, Activity, 
   MapPin, ShieldAlert, QrCode, BookOpen, Map as MapIcon, Phone, Navigation as NavIcon, Crosshair,
   RefreshCw, Stethoscope, Heart, Droplets, Thermometer, ClipboardCheck, ArrowRight, ExternalLink,
-  Info, Bell, Eye, Star, TrendingUp, CheckSquare, Zap, Shield, List, Sparkles, BrainCircuit, Waves, Utensils, Download, Upload, Database, UserX, Save, PartyPopper, RefreshCcw, Scale, Ruler
+  Info, Bell, Eye, Star, TrendingUp, CheckSquare, Zap, Shield, List, Sparkles, BrainCircuit, Waves, Utensils, Download, Upload, Database, UserX, Save, PartyPopper, RefreshCcw, Scale, Ruler, CalendarDays, Siren, FileText
 } from 'lucide-react';
 
 import { Sidebar } from './Sidebar';
@@ -409,13 +409,14 @@ export default function App() {
     const patients = useMemo(() => state.users.filter(u => u.role === UserRole.USER), [state.users]);
     const today = new Date().toISOString().split('T')[0];
 
+    // ... (User Dashboard Code remains the same) ...
     if (currentUser?.role === UserRole.USER) {
-      const progress = calculatePregnancyProgress(currentUser.hpht);
-      const babySize = getBabySizeByWeek(progress?.weeks || 0);
-      const userVisits = state.ancVisits.filter(v => v.patientId === currentUser.id).sort((a,b) => b.visitDate.localeCompare(a.visitDate));
-      const latest = userVisits[0];
-      const risk = getRiskCategory(currentUser.totalRiskScore, latest);
-      const checklist = state.userChecklists[currentUser.id] || {};
+        const progress = calculatePregnancyProgress(currentUser.hpht);
+        const babySize = getBabySizeByWeek(progress?.weeks || 0);
+        const userVisits = state.ancVisits.filter(v => v.patientId === currentUser.id).sort((a,b) => b.visitDate.localeCompare(a.visitDate));
+        const latest = userVisits[0];
+        const risk = getRiskCategory(currentUser.totalRiskScore, latest);
+        const checklist = state.userChecklists[currentUser.id] || {};
 
       return (
         <div className="space-y-8 md:space-y-12 animate-in fade-in duration-700">
@@ -578,50 +579,92 @@ export default function App() {
     }
 
     if (currentUser?.role === UserRole.ADMIN) {
+      const recentLogs = state.logs.filter(l => l.action.includes('REGISTER')).slice(0, 5);
       return (
         <div className="space-y-10 animate-in fade-in duration-700">
+          <div className="bg-indigo-900 p-10 rounded-[4rem] text-white shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
+             <div className="relative z-10">
+                <h2 className="text-4xl font-black uppercase tracking-tighter mb-2">System Overview</h2>
+                <p className="text-indigo-200 font-bold uppercase text-[10px] tracking-widest">Panel Kontrol Administrator Utama</p>
+             </div>
+             <div className="flex gap-4 relative z-10">
+                <div className="px-6 py-3 bg-white/10 rounded-2xl border border-white/10 flex items-center gap-3">
+                   <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                   <span className="text-xs font-black uppercase">System Online</span>
+                </div>
+                <div className="px-6 py-3 bg-white/10 rounded-2xl border border-white/10 flex items-center gap-3">
+                   <Database size={16} />
+                   <span className="text-xs font-black uppercase">v{DATABASE_VERSION}</span>
+                </div>
+             </div>
+             <ShieldCheck size={200} className="absolute -right-20 -bottom-20 opacity-5 pointer-events-none rotate-12" />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-             <div className="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-xl flex flex-col justify-between group hover:scale-[1.02] transition-transform">
-                <div><p className="text-[10px] font-black uppercase opacity-50 tracking-widest">Integritas Akun</p><h3 className="text-4xl font-black mt-2 tracking-tighter">{state.users.length}</h3></div>
-                <Users className="text-indigo-500/20 self-end" size={32} />
+             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm group hover:scale-[1.02] transition-transform">
+                <div className="flex justify-between items-start mb-4">
+                   <div className="bg-indigo-50 p-3 rounded-2xl text-indigo-600"><Users size={20} /></div>
+                </div>
+                <h3 className="text-4xl font-black text-gray-900 tracking-tighter">{state.users.length}</h3>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Total Akun Terdaftar</p>
              </div>
-             <div className="bg-emerald-600 p-8 rounded-[2.5rem] text-white shadow-xl flex flex-col justify-between group hover:scale-[1.02] transition-transform">
-                <div><p className="text-[10px] font-black uppercase opacity-60 tracking-widest">Kelahiran Bayi</p><h3 className="text-4xl font-black mt-2 tracking-tighter">{state.users.filter(u => u.isDelivered).length}</h3></div>
-                <PartyPopper className="text-white/20 self-end" size={32} />
+             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm group hover:scale-[1.02] transition-transform">
+                <div className="flex justify-between items-start mb-4">
+                   <div className="bg-emerald-50 p-3 rounded-2xl text-emerald-600"><Baby size={20} /></div>
+                </div>
+                <h3 className="text-4xl font-black text-gray-900 tracking-tighter">{state.users.filter(u => u.role === UserRole.USER && !u.isDelivered).length}</h3>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Kehamilan Aktif</p>
              </div>
-             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col justify-between group hover:scale-[1.02] transition-transform">
-                <div><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Log Aktivitas</p><h3 className="text-4xl font-black text-gray-900 mt-2 tracking-tighter">{state.logs.length}</h3></div>
-                <Shield className="text-indigo-500 self-end" size={32} />
+             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm group hover:scale-[1.02] transition-transform">
+                <div className="flex justify-between items-start mb-4">
+                   <div className="bg-blue-50 p-3 rounded-2xl text-blue-600"><Stethoscope size={20} /></div>
+                </div>
+                <h3 className="text-4xl font-black text-gray-900 tracking-tighter">{state.users.filter(u => u.role === UserRole.NAKES).length}</h3>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Tenaga Kesehatan</p>
              </div>
-             <div className="bg-indigo-600 p-8 rounded-[2.5rem] text-white shadow-xl flex flex-col justify-between group hover:scale-[1.02] transition-transform">
-                <div><p className="text-[10px] font-black opacity-60 uppercase tracking-widest">Status Sistem</p><h3 className="text-xl font-black mt-2 flex items-center gap-2">Online <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"/></h3></div>
-                <RefreshCw className={`text-white/20 self-end ${isSyncing ? 'animate-spin' : ''}`} size={32} />
+             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm group hover:scale-[1.02] transition-transform">
+                <div className="flex justify-between items-start mb-4">
+                   <div className="bg-orange-50 p-3 rounded-2xl text-orange-600"><FileText size={20} /></div>
+                </div>
+                <h3 className="text-4xl font-black text-gray-900 tracking-tighter">{state.logs.length}</h3>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Total Log Aktivitas</p>
              </div>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-             <div className="bg-white p-10 rounded-[3.5rem] border border-gray-100 shadow-sm">
-                <div className="flex justify-between items-center mb-8"><h4 className="text-xl font-black uppercase tracking-tighter flex items-center gap-3"><Clock size={20} className="text-indigo-600"/> Audit Log Real-time</h4></div>
-                <div className="space-y-4 max-h-[400px] overflow-y-auto no-scrollbar">
-                  {state.logs.slice(0, 8).map(log => (
-                    <div key={log.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 transition-all hover:bg-indigo-50/50">
-                       <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 border border-gray-100 shadow-sm"><Zap size={16}/></div>
-                       <div className="flex-1 min-w-0"><p className="text-[11px] font-black text-gray-900 uppercase truncate">{log.action}</p><p className="text-[9px] font-bold text-gray-400 mt-0.5 leading-tight line-clamp-1">{log.details}</p></div>
-                       <p className="text-[8px] font-black text-gray-300 shrink-0">{new Date(log.timestamp).toLocaleTimeString()}</p>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+             <div className="lg:col-span-2 bg-white p-10 rounded-[3.5rem] border border-gray-100 shadow-sm">
+                <div className="flex justify-between items-center mb-8">
+                   <h4 className="text-xl font-black uppercase tracking-tighter flex items-center gap-3"><Clock size={20} className="text-indigo-600"/> Registrasi Pasien Terbaru</h4>
+                   <button onClick={() => handleNavigate('management')} className="text-[10px] font-black uppercase text-indigo-600 hover:underline">Lihat Semua</button>
+                </div>
+                <div className="space-y-4">
+                  {recentLogs.length > 0 ? recentLogs.map(log => (
+                    <div key={log.id} className="flex items-center gap-4 p-5 bg-gray-50 rounded-[2rem] border border-gray-100">
+                       <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-600 border border-gray-100 shadow-sm"><UserPlus size={16}/></div>
+                       <div className="flex-1">
+                          <p className="text-xs font-black text-gray-900 uppercase">{log.details}</p>
+                          <p className="text-[9px] font-bold text-gray-400 mt-1">{new Date(log.timestamp).toLocaleDateString()} • {new Date(log.timestamp).toLocaleTimeString()}</p>
+                       </div>
                     </div>
-                  ))}
+                  )) : (
+                    <p className="text-center text-gray-400 text-xs py-8">Belum ada registrasi baru.</p>
+                  )}
                 </div>
              </div>
-             <div className="bg-white p-10 rounded-[3.5rem] border border-gray-100 shadow-sm flex flex-col justify-between">
-                <div><h4 className="text-xl font-black uppercase tracking-tighter mb-8 flex items-center gap-3"><Users size={20} className="text-indigo-600"/> Matriks Pengguna</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-8 bg-indigo-50 rounded-3xl text-center border border-indigo-100"><p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Nakes Terdaftar</p><p className="text-4xl font-black text-indigo-900">{state.users.filter(u => u.role === UserRole.NAKES).length}</p></div>
-                    <div className="p-8 bg-emerald-50 rounded-3xl text-center border border-emerald-100"><p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Pasien Aktif</p><p className="text-4xl font-black text-emerald-900">{patients.length}</p></div>
-                  </div>
-                </div>
-                <div className="mt-8 p-8 bg-slate-900 rounded-[2.5rem] text-white flex items-center justify-between relative overflow-hidden group">
-                   <div className="relative z-10 flex items-center gap-4"><Database className="text-emerald-400" size={24} /><div><p className="text-[10px] font-black uppercase tracking-widest opacity-60">Status Database</p><p className="text-sm font-black uppercase">v{DATABASE_VERSION} Local-First</p></div></div>
-                   <button onClick={handleExportSystemData} className="relative z-10 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-[10px] font-black uppercase transition-all">Download DB</button>
-                   <Waves className="absolute -bottom-10 -right-10 text-white/5 w-64 h-64 rotate-45" />
+
+             <div className="bg-slate-50 p-10 rounded-[3.5rem] border border-gray-100 flex flex-col justify-between">
+                <div>
+                   <h4 className="text-xl font-black uppercase tracking-tighter mb-8 flex items-center gap-3"><Zap size={20} className="text-orange-500"/> Akses Cepat</h4>
+                   <div className="space-y-4">
+                      <button onClick={() => handleNavigate('management')} className="w-full p-5 bg-white rounded-[2rem] border border-gray-200 shadow-sm text-left flex items-center gap-4 hover:bg-indigo-50 hover:border-indigo-200 transition-all group">
+                         <div className="bg-indigo-100 p-2 rounded-xl text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors"><Users size={18}/></div>
+                         <div><p className="text-xs font-black uppercase text-gray-900">Manajemen User</p><p className="text-[9px] text-gray-400">Tambah/Edit Akun</p></div>
+                      </button>
+                      <button onClick={handleExportSystemData} className="w-full p-5 bg-white rounded-[2rem] border border-gray-200 shadow-sm text-left flex items-center gap-4 hover:bg-emerald-50 hover:border-emerald-200 transition-all group">
+                         <div className="bg-emerald-100 p-2 rounded-xl text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors"><Download size={18}/></div>
+                         <div><p className="text-xs font-black uppercase text-gray-900">Backup Data</p><p className="text-[9px] text-gray-400">Ekspor JSON</p></div>
+                      </button>
+                   </div>
                 </div>
              </div>
           </div>
@@ -630,59 +673,146 @@ export default function App() {
     }
 
     if (currentUser?.role === UserRole.NAKES) {
-      const priorityList = patients.filter(p => !p.isDelivered).map(p => {
+      // Data Preparation for Nakes Dashboard
+      const activePatients = patients.filter(p => !p.isDelivered);
+      
+      const patientsWithRisk = activePatients.map(p => {
         const pVisits = state.ancVisits.filter(v => v.patientId === p.id).sort((a,b) => b.visitDate.localeCompare(a.visitDate));
         const latest = pVisits[0];
-        return { ...p, risk: getRiskCategory(p.totalRiskScore, latest), latestVisit: latest };
-      }).filter(p => p.risk.label === 'HITAM' || p.risk.label === 'MERAH')
-      .sort((a,b) => (a.risk.priority || 0) - (b.risk.priority || 0));
+        const nextVisit = latest?.nextVisitDate;
+        const isMissed = nextVisit && nextVisit < today;
+        const isToday = nextVisit === today;
+        return { ...p, risk: getRiskCategory(p.totalRiskScore, latest), latestVisit: latest, isMissed, isToday };
+      });
+
+      const riskCounts = {
+        HITAM: patientsWithRisk.filter(p => p.risk.label === 'HITAM').length,
+        MERAH: patientsWithRisk.filter(p => p.risk.label === 'MERAH').length,
+        KUNING: patientsWithRisk.filter(p => p.risk.label === 'KUNING').length,
+        HIJAU: patientsWithRisk.filter(p => p.risk.label === 'HIJAU').length,
+      };
+
+      const missedPatients = patientsWithRisk.filter(p => p.isMissed);
+      const todayPatients = patientsWithRisk.filter(p => p.isToday);
+
+      const totalActive = activePatients.length;
 
       return (
         <div className="space-y-10 animate-in fade-in duration-700">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-             <div className="bg-red-600 p-10 rounded-[3rem] text-white shadow-xl relative overflow-hidden group">
-                <p className="text-[10px] font-black uppercase opacity-70 tracking-widest">Pasien Emergensi</p>
-                <h3 className="text-5xl font-black mt-2 tracking-tighter">{priorityList.length} <span className="text-xl opacity-50">Ibu</span></h3>
-                <button onClick={() => handleNavigate('monitoring')} className="mt-8 px-6 py-3 bg-white text-red-600 rounded-xl text-[10px] font-black uppercase shadow-lg group-hover:scale-105 transition-transform">Pantau Risiko</button>
-                <ShieldAlert size={120} className="absolute -right-6 -bottom-6 opacity-10 rotate-12" />
-             </div>
-             <div className="bg-emerald-600 p-10 rounded-[3rem] text-white shadow-xl flex flex-col justify-between">
-                <div><p className="text-[10px] font-black uppercase opacity-70 tracking-widest">Total Bayi Lahir</p><h3 className="text-5xl font-black mt-2 tracking-tighter">{state.users.filter(u => u.isDelivered).length} <span className="text-xl opacity-50">Bayi</span></h3></div>
-                <button onClick={() => handleNavigate('patients')} className="mt-8 w-full py-4 bg-white/20 hover:bg-white/30 rounded-xl text-[10px] font-black uppercase transition-all">Lihat Data Nifas</button>
-             </div>
-             <div className="bg-white p-10 rounded-[3rem] border border-gray-100 flex flex-col items-center justify-center text-center">
-                <MapPin size={48} className="text-indigo-100 mb-4" />
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Peta Sebaran Pasien</p>
-                <button onClick={() => handleNavigate('map')} className="w-full py-4 bg-indigo-50 text-indigo-600 rounded-xl text-[10px] font-black uppercase">Buka Pemetaan</button>
-             </div>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-             <div className="space-y-6">
-                <div className="flex items-center justify-between px-2"><h4 className="text-xl font-black uppercase tracking-tighter flex items-center gap-3"><ShieldAlert className="text-red-600"/> Pasien Risiko Tinggi</h4></div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {priorityList.slice(0, 4).map(p => (
-                    <div key={p.id} className="bg-white p-8 rounded-[3.5rem] border border-gray-100 shadow-sm relative group overflow-hidden hover:shadow-2xl transition-all duration-500">
-                      <div className={`absolute top-0 right-0 w-32 h-2 ${p.risk.label === 'HITAM' ? 'bg-slate-950' : 'bg-red-600'}`} />
-                      <div className="flex justify-between items-start mb-6"><div className="flex items-center gap-4"><div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center font-black text-indigo-600 border border-gray-100">{p.name.charAt(0)}</div><div><h5 className="text-xl font-black text-gray-900 tracking-tighter uppercase truncate max-w-[120px]">{p.name}</h5><p className="text-[9px] font-black text-gray-400 uppercase mt-1">Kel. {p.kelurahan}</p></div></div><div className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase ${p.risk.color}`}>{p.risk.label}</div></div>
-                      <div className="flex gap-2"><button onClick={() => setViewingPatientProfile(p.id)} className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase shadow-xl shadow-indigo-100">Profil</button><button onClick={() => setIsAddingVisit(p)} className="p-4 bg-gray-50 text-gray-400 rounded-2xl hover:text-indigo-600 transition-all"><Activity size={18}/></button></div>
+           {/* Hero Stats */}
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-indigo-600 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
+                 <p className="text-[10px] font-black uppercase opacity-60 tracking-widest">Total Ibu Hamil Aktif</p>
+                 <h3 className="text-5xl font-black mt-2 tracking-tighter">{totalActive}</h3>
+                 <Users className="absolute -right-4 -bottom-4 text-white/10 w-32 h-32 rotate-12" />
+              </div>
+              <div className="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
+                 <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-[10px] font-black uppercase opacity-60 tracking-widest">Risiko Tinggi (Merah/Hitam)</p>
+                      <h3 className="text-5xl font-black mt-2 tracking-tighter text-red-400">{riskCounts.HITAM + riskCounts.MERAH}</h3>
                     </div>
-                  ))}
-                </div>
-             </div>
-             <div className="bg-slate-900 p-10 rounded-[4rem] text-white shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[400px]">
-                <div className="relative z-10">
-                  <h4 className="text-2xl font-black uppercase tracking-tighter mb-10 flex items-center gap-3"><Calendar size={24} className="text-indigo-400"/> Agenda Nakes</h4>
-                  <div className="space-y-6">
-                    <div className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] backdrop-blur-xl group hover:bg-white/10 transition-colors">
-                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-2">Total Pantauan ANC</p>
-                        <p className="text-4xl font-black tracking-tighter">{patients.filter(p => !p.isDelivered).length} <span className="text-sm font-bold opacity-40 uppercase ml-2">Ibu Hamil</span></p>
+                    {riskCounts.HITAM > 0 && <div className="animate-pulse bg-red-600 px-3 py-1 rounded-lg text-[9px] font-black uppercase">! Perhatian</div>}
+                 </div>
+                 <ShieldAlert className="absolute -right-4 -bottom-4 text-red-500/20 w-32 h-32 rotate-12" />
+              </div>
+              <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm relative overflow-hidden">
+                 <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Jadwal Kontrol Hari Ini</p>
+                 <h3 className="text-5xl font-black mt-2 tracking-tighter text-gray-900">{todayPatients.length}</h3>
+                 <CalendarDays className="absolute -right-4 -bottom-4 text-gray-100 w-32 h-32 rotate-12" />
+              </div>
+           </div>
+
+           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+              {/* Left Column: Risk Distribution & Missed Patients */}
+              <div className="lg:col-span-2 space-y-10">
+                 {/* Risk Distribution Bar */}
+                 <div className="bg-white p-10 rounded-[3.5rem] border border-gray-100 shadow-sm">
+                    <h4 className="text-xl font-black uppercase tracking-tighter mb-6 flex items-center gap-3"><Activity size={20} className="text-indigo-600"/> Distribusi Risiko Wilayah</h4>
+                    
+                    <div className="h-12 w-full bg-gray-100 rounded-full overflow-hidden flex shadow-inner">
+                       {totalActive > 0 ? (
+                         <>
+                           <div className="h-full bg-slate-900 flex items-center justify-center text-[10px] font-black text-white uppercase transition-all duration-1000" style={{ width: `${(riskCounts.HITAM / totalActive) * 100}%` }}>{riskCounts.HITAM > 0 && riskCounts.HITAM}</div>
+                           <div className="h-full bg-red-600 flex items-center justify-center text-[10px] font-black text-white uppercase transition-all duration-1000" style={{ width: `${(riskCounts.MERAH / totalActive) * 100}%` }}>{riskCounts.MERAH > 0 && riskCounts.MERAH}</div>
+                           <div className="h-full bg-yellow-400 flex items-center justify-center text-[10px] font-black text-yellow-900 uppercase transition-all duration-1000" style={{ width: `${(riskCounts.KUNING / totalActive) * 100}%` }}>{riskCounts.KUNING > 0 && riskCounts.KUNING}</div>
+                           <div className="h-full bg-emerald-500 flex items-center justify-center text-[10px] font-black text-white uppercase transition-all duration-1000" style={{ width: `${(riskCounts.HIJAU / totalActive) * 100}%` }}>{riskCounts.HIJAU > 0 && riskCounts.HIJAU}</div>
+                         </>
+                       ) : (
+                         <div className="w-full h-full flex items-center justify-center text-xs text-gray-400 font-bold uppercase">Belum ada data</div>
+                       )}
                     </div>
-                  </div>
-                </div>
-                <div className="relative z-10 space-y-4 pt-10"><button onClick={() => handleNavigate('register')} className="w-full py-6 bg-indigo-600 text-white rounded-[2rem] text-xs font-black uppercase tracking-widest shadow-xl hover:scale-[1.05] transition-all flex items-center justify-center gap-3"><UserPlus size={16}/> Registrasi Pasien</button></div>
-                <Activity size={240} className="absolute -left-10 -bottom-10 opacity-5 pointer-events-none rotate-12" />
-             </div>
-          </div>
+                    <div className="flex justify-between mt-4 px-2">
+                       <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-slate-900"></div><span className="text-[10px] font-bold uppercase text-gray-500">Gawat (Hitam)</span></div>
+                       <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-red-600"></div><span className="text-[10px] font-bold uppercase text-gray-500">Tinggi (Merah)</span></div>
+                       <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-yellow-400"></div><span className="text-[10px] font-bold uppercase text-gray-500">Sedang (Kuning)</span></div>
+                       <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500"></div><span className="text-[10px] font-bold uppercase text-gray-500">Rendah (Hijau)</span></div>
+                    </div>
+                 </div>
+
+                 {/* Missed Appointment Alert (Mangkir) */}
+                 <div className="bg-red-50 p-10 rounded-[3.5rem] border border-red-100">
+                    <div className="flex justify-between items-center mb-6">
+                       <h4 className="text-xl font-black uppercase tracking-tighter flex items-center gap-3 text-red-700"><Siren size={20}/> Perhatian: Pasien Mangkir ({missedPatients.length})</h4>
+                       <button onClick={() => handleNavigate('patients')} className="px-4 py-2 bg-white text-red-600 rounded-xl text-[9px] font-black uppercase shadow-sm">Lihat Semua</button>
+                    </div>
+                    <div className="space-y-3">
+                       {missedPatients.length > 0 ? missedPatients.slice(0, 3).map(p => (
+                         <div key={p.id} className="bg-white p-5 rounded-[2rem] border border-red-100 flex items-center justify-between shadow-sm">
+                            <div className="flex items-center gap-4">
+                               <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center font-black">{p.name.charAt(0)}</div>
+                               <div>
+                                  <p className="text-xs font-black text-gray-900 uppercase">{p.name}</p>
+                                  <p className="text-[9px] font-bold text-red-400 uppercase mt-0.5">Seharusnya: {p.latestVisit?.nextVisitDate}</p>
+                               </div>
+                            </div>
+                            <a href={`https://wa.me/${p.phone}`} target="_blank" rel="noreferrer" className="p-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors"><Phone size={14}/></a>
+                         </div>
+                       )) : (
+                         <p className="text-center text-red-400 text-xs font-bold py-4">Tidak ada pasien mangkir saat ini.</p>
+                       )}
+                    </div>
+                 </div>
+              </div>
+
+              {/* Right Column: Schedule & Quick Actions */}
+              <div className="space-y-8">
+                 <div className="bg-white p-8 rounded-[3.5rem] border border-gray-100 shadow-sm h-full flex flex-col">
+                    <h4 className="text-lg font-black uppercase tracking-tighter mb-6 flex items-center gap-3"><Calendar size={20} className="text-indigo-600"/> Jadwal Hari Ini</h4>
+                    <div className="space-y-4 flex-1 overflow-y-auto max-h-[300px] no-scrollbar">
+                       {todayPatients.length > 0 ? todayPatients.map(p => (
+                         <div key={p.id} className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                            <div className={`w-2 h-10 rounded-full ${p.risk.color.split(' ')[1]}`}></div>
+                            <div className="flex-1 min-w-0">
+                               <p className="text-xs font-black text-gray-900 uppercase truncate">{p.name}</p>
+                               <p className="text-[9px] text-gray-400 font-bold uppercase">Triase {p.risk.label}</p>
+                            </div>
+                            <button onClick={() => setIsAddingVisit(p)} className="p-2 bg-indigo-600 text-white rounded-lg"><Edit3 size={14}/></button>
+                         </div>
+                       )) : (
+                         <div className="text-center py-10 opacity-50">
+                            <CalendarDays size={40} className="mx-auto mb-2 text-gray-300"/>
+                            <p className="text-[10px] font-black text-gray-400 uppercase">Tidak ada jadwal</p>
+                         </div>
+                       )}
+                    </div>
+                 </div>
+                 
+                 <div className="bg-slate-900 p-8 rounded-[3rem] text-white">
+                    <h4 className="text-lg font-black uppercase tracking-tighter mb-6">Aksi Cepat</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                       <button onClick={() => handleNavigate('register')} className="p-4 bg-white/10 rounded-2xl hover:bg-white/20 transition-all text-center">
+                          <UserPlus size={20} className="mx-auto mb-2"/>
+                          <p className="text-[9px] font-black uppercase">Registrasi</p>
+                       </button>
+                       <button onClick={() => handleNavigate('map')} className="p-4 bg-white/10 rounded-2xl hover:bg-white/20 transition-all text-center">
+                          <MapIcon size={20} className="mx-auto mb-2"/>
+                          <p className="text-[9px] font-black uppercase">Peta</p>
+                       </button>
+                    </div>
+                 </div>
+              </div>
+           </div>
         </div>
       );
     }
@@ -701,112 +831,110 @@ export default function App() {
         <Header title={viewingPatientProfile ? "Profil Medis" : view.toUpperCase()} userName={currentUser?.name || ''} userRole={currentUser?.role} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onSearchChange={setPatientSearch} onLogout={() => setCurrentUser(null)} alerts={state.alerts} onMarkAsRead={(id) => setState(prev => ({ ...prev, alerts: prev.alerts.map(a => a.id === id ? { ...a, isRead: true } : a) }))} onNavigateToPatient={handleNavigate} isSyncing={isSyncing} />
         <div className="p-4 md:p-8 lg:p-12 xl:p-16 max-w-[1600px] mx-auto">
           {notification && <div className="fixed top-6 md:top-10 left-1/2 -translate-x-1/2 z-[999] px-6 md:px-10 py-4 md:py-6 bg-slate-900 text-white rounded-[2rem] shadow-2xl flex items-center gap-4 animate-in slide-in-from-top-10"><CheckCircle size={20} className="text-emerald-400" /><p className="text-xs font-black uppercase tracking-widest">{notification.message}</p></div>}
+          
           {view === 'dashboard' && <DashboardHome />}
+          
           {view === 'patients' && currentUser.role !== UserRole.USER && (
             <PatientList users={state.users} visits={state.ancVisits} onEdit={(u) => { setEditingPatient(u); setTempRiskFactors(u.selectedRiskFactors); setView('register'); }} onAddVisit={(u) => { setIsAddingVisit(u); setVisitPreviewData({ bloodPressure: '120/80', dangerSigns: [], fetalMovement: 'Normal', djj: 140 }); }} onViewProfile={(id) => setViewingPatientProfile(id)} onDeletePatient={(id) => { if(window.confirm('Hapus permanen?')) setState(prev => ({...prev, users: prev.users.filter(u => u.id !== id)})) }} onDeleteVisit={handleDeleteVisit} onToggleVisitStatus={() => {}} onRecordDelivery={(u) => setRecordingDelivery(u)} onStartNewPregnancy={(u) => setStartingNewPregnancy(u)} currentUserRole={currentUser.role} searchFilter={patientSearch} />
           )}
 
-          {/* MODAL: CATAT KELAHIRAN - OPTIMIZED FOR MOBILE */}
+          {/* ... (Modal Deliver & New Pregnancy) ... */}
           {recordingDelivery && (
-            <div className="fixed inset-0 z-[120] bg-indigo-950/90 backdrop-blur-2xl flex items-center justify-center p-4 overflow-y-auto">
-              <div className="bg-white w-full max-w-3xl rounded-[2.5rem] md:rounded-[3rem] shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden my-auto">
-                <div className="bg-indigo-600 p-8 md:p-12 text-white text-center relative">
-                  <PartyPopper className="mx-auto mb-4" size={48} />
-                  <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">Catat Kelahiran</h3>
-                  <p className="text-indigo-200 font-bold uppercase text-[10px] tracking-widest mt-2">Ibu {recordingDelivery.name}</p>
-                  <button onClick={() => setRecordingDelivery(null)} className="absolute top-6 right-6 md:top-8 md:right-8 text-white/50 hover:text-white transition-colors"><X/></button>
+             <div className="fixed inset-0 z-[120] bg-indigo-950/90 backdrop-blur-2xl flex items-center justify-center p-4 overflow-y-auto">
+                {/* ... existing modal code ... */}
+                <div className="bg-white w-full max-w-3xl rounded-[2.5rem] md:rounded-[3rem] shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden my-auto">
+                   {/* ... content ... */}
+                   <div className="bg-indigo-600 p-8 md:p-12 text-white text-center relative">
+                     <PartyPopper className="mx-auto mb-4" size={48} />
+                     <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">Catat Kelahiran</h3>
+                     {/* ... */}
+                     <button onClick={() => setRecordingDelivery(null)} className="absolute top-6 right-6 md:top-8 md:right-8 text-white/50 hover:text-white transition-colors"><X/></button>
+                   </div>
+                   <form onSubmit={handleDeliverySubmit} className="p-6 md:p-12 space-y-8">
+                      {/* ... form fields ... */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
+                         <div className="space-y-2">
+                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Nama Bayi (Opsional)</label>
+                           <input name="babyName" placeholder="Contoh: Muhammad Yusuf" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-bold outline-none focus:ring-4 focus:ring-indigo-100" />
+                         </div>
+                         {/* ... */}
+                         <div className="space-y-2">
+                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Jenis Kelamin</label>
+                           <select name="babyGender" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required>
+                             <option value="L">LAKI-LAKI</option>
+                             <option value="P">PEREMPUAN</option>
+                           </select>
+                         </div>
+                      </div>
+                      {/* ... rest of form ... */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8">
+                         <div className="space-y-2">
+                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Tanggal Lahir</label>
+                           <input type="date" name="deliveryDate" defaultValue={new Date().toISOString().split('T')[0]} className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required />
+                         </div>
+                         <div className="space-y-2">
+                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 flex items-center gap-1"><Scale size={12}/> Berat (g)</label>
+                           <input type="number" name="babyWeight" placeholder="Contoh: 3100" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required />
+                         </div>
+                         <div className="space-y-2">
+                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 flex items-center gap-1"><Ruler size={12}/> Tinggi (cm)</label>
+                           <input type="number" name="babyHeight" placeholder="Contoh: 50" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required />
+                         </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
+                         <div className="space-y-2">
+                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Status Ibu</label>
+                           <select name="motherStatus" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required>
+                             <option value="SEHAT">SEHAT / STABIL</option>
+                             <option value="KOMPLIKASI">KOMPLIKASI PASCA SALIN</option>
+                             <option value="MENINGGAL">MENINGGAL DUNIA</option>
+                           </select>
+                         </div>
+                         <div className="space-y-2">
+                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Status Bayi</label>
+                           <select name="babyStatus" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required>
+                             <option value="HIDUP_SEHAT">HIDUP & SEHAT</option>
+                             <option value="HIDUP_KOMPLIKASI">HIDUP & BUTUH PERAWATAN</option>
+                             <option value="MENINGGAL">MENINGGAL DUNIA</option>
+                           </select>
+                         </div>
+                      </div>
+                      <div className="space-y-2">
+                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Keterangan Tambahan</label>
+                         <textarea name="condition" placeholder="Tuliskan catatan persalinan..." className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-bold outline-none focus:ring-4 focus:ring-indigo-100" rows={2}></textarea>
+                      </div>
+                      <button type="submit" className="w-full py-6 bg-indigo-600 text-white rounded-[2rem] font-black uppercase text-xs tracking-widest shadow-xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-3"><Save size={18}/> Simpan Rekam Medis & Arsipkan Pasien</button>
+                   </form>
                 </div>
-                <form onSubmit={handleDeliverySubmit} className="p-6 md:p-12 space-y-8">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Nama Bayi (Opsional)</label>
-                      <input name="babyName" placeholder="Contoh: Muhammad Yusuf" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-bold outline-none focus:ring-4 focus:ring-indigo-100" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Jenis Kelamin</label>
-                      <select name="babyGender" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required>
-                        <option value="L">LAKI-LAKI</option>
-                        <option value="P">PEREMPUAN</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Tanggal Lahir</label>
-                      <input type="date" name="deliveryDate" defaultValue={new Date().toISOString().split('T')[0]} className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 flex items-center gap-1"><Scale size={12}/> Berat (g)</label>
-                      <input type="number" name="babyWeight" placeholder="Contoh: 3100" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4 flex items-center gap-1"><Ruler size={12}/> Tinggi (cm)</label>
-                      <input type="number" name="babyHeight" placeholder="Contoh: 50" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Status Ibu</label>
-                      <select name="motherStatus" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required>
-                        <option value="SEHAT">SEHAT / STABIL</option>
-                        <option value="KOMPLIKASI">KOMPLIKASI PASCA SALIN</option>
-                        <option value="MENINGGAL">MENINGGAL DUNIA</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Status Bayi</label>
-                      <select name="babyStatus" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-black outline-none focus:ring-4 focus:ring-indigo-100" required>
-                        <option value="HIDUP_SEHAT">HIDUP & SEHAT</option>
-                        <option value="HIDUP_KOMPLIKASI">HIDUP & BUTUH PERAWATAN</option>
-                        <option value="MENINGGAL">MENINGGAL DUNIA</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Keterangan Tambahan</label>
-                    <textarea name="condition" placeholder="Tuliskan catatan persalinan..." className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-bold outline-none focus:ring-4 focus:ring-indigo-100" rows={2}></textarea>
-                  </div>
-
-                  <button type="submit" className="w-full py-6 bg-indigo-600 text-white rounded-[2rem] font-black uppercase text-xs tracking-widest shadow-xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-3"><Save size={18}/> Simpan Rekam Medis & Arsipkan Pasien</button>
-                </form>
-              </div>
-            </div>
+             </div>
           )}
 
           {startingNewPregnancy && (
-            <div className="fixed inset-0 z-[120] bg-slate-950/90 backdrop-blur-2xl flex items-center justify-center p-4">
-              <div className="bg-white w-full max-w-xl rounded-[3rem] shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
-                <div className="bg-slate-900 p-10 text-white text-center relative">
-                  <RefreshCcw className="mx-auto mb-4 text-indigo-400" size={48} />
-                  <h3 className="text-3xl font-black uppercase tracking-tighter leading-none">Mulai Siklus ANC Baru</h3>
-                  <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest mt-2">Ny. {startingNewPregnancy.name}</p>
-                  <button onClick={() => setStartingNewPregnancy(null)} className="absolute top-8 right-8 text-white/30 hover:text-white transition-colors"><X/></button>
-                </div>
-                <form onSubmit={handleNewPregnancySubmit} className="p-10 space-y-8">
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">HPHT Terbaru (Hari Pertama Haid Terakhir)</label>
-                    <input type="date" name="newHpht" className="w-full px-8 py-5 bg-gray-50 border-none rounded-[2rem] font-black text-lg outline-none focus:ring-8 focus:ring-indigo-100" required />
-                  </div>
-                  <div className="p-8 bg-indigo-50 rounded-[2.5rem] border border-indigo-100 flex items-start gap-4">
-                    <AlertCircle size={24} className="text-indigo-600 shrink-0" />
-                    <div>
-                      <p className="text-[11px] font-black text-indigo-900 uppercase tracking-tight">Peringatan Medis</p>
-                      <p className="text-[10px] font-bold text-indigo-700 leading-relaxed uppercase mt-1">Data kelahiran sebelumnya akan diarsipkan secara otomatis. Nilai Gravida (G) akan meningkat menjadi G{startingNewPregnancy.pregnancyNumber + 1}.</p>
-                    </div>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <button type="submit" className="flex-1 py-6 bg-indigo-600 text-white rounded-[2.5rem] font-black uppercase text-xs tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center justify-center gap-3"><Sparkles size={18}/> Aktifkan Pemantauan</button>
-                    <button type="button" onClick={() => setStartingNewPregnancy(null)} className="px-10 py-6 bg-gray-100 text-gray-500 rounded-[2.5rem] font-black uppercase text-xs tracking-widest">Batal</button>
-                  </div>
-                </form>
-              </div>
-            </div>
+             <div className="fixed inset-0 z-[120] bg-slate-950/90 backdrop-blur-2xl flex items-center justify-center p-4">
+               {/* ... */}
+               <div className="bg-white w-full max-w-xl rounded-[3rem] shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden">
+                 <div className="bg-slate-900 p-10 text-white text-center relative">
+                   <RefreshCcw className="mx-auto mb-4 text-indigo-400" size={48} />
+                   <h3 className="text-3xl font-black uppercase tracking-tighter leading-none">Mulai Siklus ANC Baru</h3>
+                   <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest mt-2">Ny. {startingNewPregnancy.name}</p>
+                   <button onClick={() => setStartingNewPregnancy(null)} className="absolute top-8 right-8 text-white/30 hover:text-white transition-colors"><X/></button>
+                 </div>
+                 <form onSubmit={handleNewPregnancySubmit} className="p-10 space-y-8">
+                   <div className="space-y-4">
+                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">HPHT Terbaru (Hari Pertama Haid Terakhir)</label>
+                     <input type="date" name="newHpht" className="w-full px-8 py-5 bg-gray-50 border-none rounded-[2rem] font-black text-lg outline-none focus:ring-8 focus:ring-indigo-100" required />
+                   </div>
+                   {/* ... */}
+                   <div className="flex flex-col sm:flex-row gap-4">
+                     <button type="submit" className="flex-1 py-6 bg-indigo-600 text-white rounded-[2.5rem] font-black uppercase text-xs tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center justify-center gap-3"><Sparkles size={18}/> Aktifkan Pemantauan</button>
+                     <button type="button" onClick={() => setStartingNewPregnancy(null)} className="px-10 py-6 bg-gray-100 text-gray-500 rounded-[2.5rem] font-black uppercase text-xs tracking-widest">Batal</button>
+                   </div>
+                 </form>
+               </div>
+             </div>
           )}
 
-          {/* VIEW: PENDAFTARAN ANC - OPTIMIZED GRID FOR MOBILE */}
+          {/* VIEW: PENDAFTARAN ANC - OPTIMIZED GRID FOR MOBILE & SPR GROUPING */}
           {view === 'register' && currentUser.role !== UserRole.USER && (
             <div className="max-w-5xl mx-auto space-y-12 animate-in zoom-in-95">
               <div className="bg-white p-8 md:p-16 lg:p-20 rounded-[3rem] md:rounded-[4rem] shadow-sm border border-gray-100">
@@ -822,7 +950,7 @@ export default function App() {
                   </div>
                   <div className={`w-full md:w-auto px-10 py-5 rounded-[2rem] border-4 flex items-center justify-between md:justify-start gap-5 transition-all duration-700 shadow-xl ${currentRegisterRisk.color}`}>
                     <div className="text-left">
-                      <p className="text-[9px] font-black uppercase opacity-60 tracking-widest">Triase Live Prediction</p>
+                      <p className="text-[9px] font-black uppercase opacity-60 tracking-widest">Triase KSPR Skor {2 + tempRiskFactors.reduce((acc, id) => acc + (RISK_FACTORS_MASTER[id]?.score || 0), 0)}</p>
                       <p className="text-lg font-black uppercase tracking-tighter">{currentRegisterRisk.label}</p>
                     </div>
                     <Activity size={24} className="animate-pulse shrink-0" />
@@ -848,6 +976,7 @@ export default function App() {
 
                   {/* Parameter Kehamilan Section */}
                   <div className="bg-indigo-50/50 p-8 md:p-10 rounded-[3.5rem] border border-indigo-100 relative overflow-hidden">
+                    {/* ... fields hpht, gravida, etc ... */}
                     <h4 className="text-xs md:text-sm font-black text-indigo-900 uppercase tracking-[0.3em] mb-10 flex items-center gap-3 relative z-10">
                       <Baby size={18} /> Parameter Kehamilan Utama
                     </h4>
@@ -873,7 +1002,8 @@ export default function App() {
 
                   {/* Alamat & Lokasi Section */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
-                    <div className="space-y-8">
+                     {/* ... same as before ... */}
+                     <div className="space-y-8">
                       <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-3"><MapPin size={18} /> Data Domisili</h4>
                       <textarea name="address" rows={3} defaultValue={editingPatient?.address} className="w-full px-6 py-4 bg-gray-50 border-none rounded-[2rem] font-bold outline-none focus:ring-8 focus:ring-indigo-100 transition-all" placeholder="Alamat Lengkap..." required />
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -911,22 +1041,39 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Penapisan Risiko Section */}
-                  <div className="space-y-10">
+                  {/* Penapisan Risiko Section - SKOR PUJI ROCHJATI */}
+                  <div className="space-y-12">
                     <label className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-3 ml-4">
-                      <ShieldAlert size={18} /> Penapisan Faktor Resiko (Skor SPR)
+                      <ShieldAlert size={18} /> Penapisan Faktor Resiko (Skor Puji Rochjati)
                     </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {Object.entries(RISK_FACTORS_MASTER).map(([id, info]) => (
-                        <label key={id} className={`flex items-start gap-5 p-6 rounded-[2rem] border-4 transition-all cursor-pointer group hover:scale-[1.01] ${tempRiskFactors.includes(id) ? 'bg-indigo-50 border-indigo-600 shadow-xl' : 'bg-gray-50 border-transparent'}`}>
-                          <input type="checkbox" className="mt-1 accent-indigo-600 w-5 h-5 shrink-0" checked={tempRiskFactors.includes(id)} onChange={(e) => { if (e.target.checked) setTempRiskFactors([...tempRiskFactors, id]); else setTempRiskFactors(tempRiskFactors.filter(f => f !== id)); }} />
-                          <div className="min-w-0">
-                            <p className="text-xs font-black text-gray-900 leading-tight uppercase group-hover:text-indigo-600 transition-colors line-clamp-2">{info.label}</p>
-                            <p className="text-[10px] font-black text-indigo-400 mt-2 tracking-widest">+{info.score} Poin Risiko</p>
-                          </div>
-                        </label>
-                      ))}
-                    </div>
+                    
+                    {['I', 'II', 'III'].map((group) => (
+                      <div key={group} className={`rounded-[3rem] p-8 md:p-10 border-2 ${
+                        group === 'I' ? 'bg-emerald-50/50 border-emerald-100' : 
+                        group === 'II' ? 'bg-yellow-50/50 border-yellow-100' : 
+                        'bg-red-50/50 border-red-100'
+                      }`}>
+                         <h4 className={`text-xs font-black uppercase tracking-[0.2em] mb-6 flex items-center gap-3 ${
+                           group === 'I' ? 'text-emerald-700' : 
+                           group === 'II' ? 'text-yellow-700' : 'text-red-700'
+                         }`}>
+                           {group === 'I' && 'Kelompok I (Skor 4) - Ada Potensi Gawat Obstetri'}
+                           {group === 'II' && 'Kelompok II (Skor 4) - Ada Gawat Obstetri'}
+                           {group === 'III' && 'Kelompok III (Skor 4) - Ada Gawat Darurat Obstetri'}
+                         </h4>
+                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                           {Object.entries(RISK_FACTORS_MASTER).filter(([_, info]) => info.group === group).map(([id, info]) => (
+                             <label key={id} className={`flex items-start gap-4 p-5 rounded-[2rem] border-2 transition-all cursor-pointer group hover:scale-[1.01] bg-white ${tempRiskFactors.includes(id) ? 'border-indigo-600 shadow-xl ring-2 ring-indigo-100' : 'border-transparent shadow-sm'}`}>
+                               <input type="checkbox" className="mt-1 accent-indigo-600 w-5 h-5 shrink-0" checked={tempRiskFactors.includes(id)} onChange={(e) => { if (e.target.checked) setTempRiskFactors([...tempRiskFactors, id]); else setTempRiskFactors(tempRiskFactors.filter(f => f !== id)); }} />
+                               <div className="min-w-0">
+                                 <p className="text-[11px] font-bold text-gray-900 leading-tight uppercase group-hover:text-indigo-600 transition-colors">{info.label}</p>
+                                 <p className="text-[9px] font-black text-indigo-400 mt-1.5 tracking-widest">+ {info.score}</p>
+                               </div>
+                             </label>
+                           ))}
+                         </div>
+                      </div>
+                    ))}
                   </div>
 
                   {/* Actions Section */}
@@ -939,9 +1086,10 @@ export default function App() {
             </div>
           )}
 
-          {/* MODAL: INPUT ANC - OPTIMIZED FOR MOBILE SPACING */}
+          {/* ... (Other Modals and Views remain consistent) ... */}
           {(isAddingVisit || editingVisit) && (
             <div className="fixed inset-0 z-[100] bg-indigo-950/80 backdrop-blur-2xl flex items-start justify-center p-2 md:p-10 overflow-y-auto">
+              {/* ... Modal Input ANC ... */}
               <div className="bg-white w-full max-w-5xl rounded-[2.5rem] md:rounded-[4.5rem] shadow-2xl my-4 md:my-auto animate-in zoom-in-95 duration-700 relative flex flex-col overflow-hidden">
                 <div className="bg-indigo-600 p-8 md:p-16 text-white flex flex-col md:flex-row justify-between items-center gap-8 shrink-0 relative overflow-hidden">
                   <div className="relative z-10 text-center md:text-left">

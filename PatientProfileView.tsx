@@ -5,7 +5,7 @@ import { calculatePregnancyProgress, getRiskCategory } from './utils';
 import { 
   X, Baby, Calendar, MapPin, Activity, Stethoscope, 
   Heart, Droplets, AlertCircle, ClipboardCheck, ArrowLeft, Phone, Info,
-  ShieldCheck, CheckCircle, BookOpen, ShieldAlert, Edit3, Trash2, History, Scale, Ruler, UserCircle
+  ShieldCheck, CheckCircle, BookOpen, ShieldAlert, Edit3, Trash2, History, Scale, Ruler, UserCircle, MessageCircle
 } from 'lucide-react';
 
 interface PatientProfileViewProps {
@@ -30,6 +30,15 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
   
   const latestVisit = patientVisits[0];
   const risk = getRiskCategory(patient.totalRiskScore, latestVisit);
+
+  const handleWhatsAppClick = () => {
+    // Format nomor: hilangkan karakter non-digit, ganti 0 di depan dengan 62
+    let phone = patient.phone.replace(/\D/g, '');
+    if (phone.startsWith('0')) {
+      phone = '62' + phone.slice(1);
+    }
+    window.open(`https://wa.me/${phone}`, '_blank');
+  };
 
   return (
     <div className="relative animate-in fade-in slide-in-from-bottom-10 duration-700 w-full max-w-7xl mx-auto">
@@ -106,6 +115,7 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-indigo-500/20 to-transparent pointer-events-none" />
               </div>
 
+              {/* CARD: LOKASI DOMISILI */}
               <div className="bg-slate-50/50 p-10 rounded-[3.5rem] border border-white shadow-sm space-y-10">
                 <div className="flex items-center gap-4 text-slate-400">
                   <MapPin size={20} strokeWidth={3} />
@@ -116,6 +126,28 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({
                   <p className="text-sm md:text-lg font-bold text-slate-700 leading-relaxed uppercase">{patient.address}, {patient.kelurahan}</p>
                 </div>
               </div>
+
+              {/* CARD: KONTAK PASIEN (NEW FEATURE) */}
+              <div className="bg-emerald-50/50 p-10 rounded-[3.5rem] border border-emerald-100/50 shadow-sm space-y-8">
+                <div className="flex items-center gap-4 text-emerald-600 opacity-70">
+                  <Phone size={20} strokeWidth={3} />
+                  <h3 className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.4em]">Kontak Pasien</h3>
+                </div>
+                
+                <div className="space-y-6">
+                  <div>
+                     <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-2">Nomor Telepon / WhatsApp</p>
+                     <p className="text-2xl font-black text-emerald-900 tracking-tight">{patient.phone}</p>
+                  </div>
+                  <button 
+                    onClick={handleWhatsAppClick}
+                    className="w-full py-5 bg-emerald-600 text-white rounded-[2rem] font-black uppercase text-xs tracking-widest shadow-xl shadow-emerald-100 hover:bg-emerald-700 hover:scale-105 transition-all flex items-center justify-center gap-3"
+                  >
+                    <MessageCircle size={18} /> Chat WhatsApp
+                  </button>
+                </div>
+              </div>
+
             </div>
 
             {/* RIGHT COLUMN - LOGS */}

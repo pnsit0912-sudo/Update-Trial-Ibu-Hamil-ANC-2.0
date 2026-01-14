@@ -1,23 +1,34 @@
 
-export const RISK_FACTORS_MASTER: Record<string, {label: string, score: number, category: string, level: 'LOW' | 'HIGH' | 'EXTREME'}> = {
-  // Faktor Risiko I (Skor 4)
-  'AGE_EXTREME': { label: 'Usia Terlalu Muda <20 / Tua >35 thn', score: 4, category: 'OBSTETRI', level: 'LOW' },
-  'PARITY_HIGH': { label: 'Anak Banyak (>= 4)', score: 4, category: 'OBSTETRI', level: 'LOW' },
-  'HEIGHT_LOW': { label: 'Tinggi Badan Rendah (<145 cm)', score: 4, category: 'MEDIS', level: 'LOW' },
-  'SHORT_PREG': { label: 'Jarak Hamil Terlalu Dekat (<2 thn)', score: 4, category: 'OBSTETRI', level: 'LOW' },
-  'ANEMIA': { label: 'Anemia (Hb <11 g/dL)', score: 4, category: 'MEDIS', level: 'LOW' },
-  
-  // Faktor Risiko II (Skor 8)
-  'HISTORY_SC': { label: 'Riwayat Sesar (SC) Sebelumnya', score: 8, category: 'OBSTETRI', level: 'HIGH' },
-  'HYPERTENSION': { label: 'Hipertensi (Tekanan Darah Tinggi)', score: 8, category: 'MEDIS', level: 'HIGH' },
-  'TWINS': { label: 'Hamil Kembar (Gemelli)', score: 8, category: 'OBSTETRI', level: 'HIGH' },
-  'POSITION_BAD': { label: 'Kelainan Letak (Sungsang/Lintang)', score: 8, category: 'OBSTETRI', level: 'HIGH' },
-  
-  // Faktor Risiko III (Skor 12)
-  'HEART_DIS': { label: 'Penyakit Jantung / Gagal Ginjal', score: 12, category: 'MEDIS', level: 'EXTREME' },
-  'DIABETES': { label: 'Diabetes Melitus (Gula Darah)', score: 12, category: 'MEDIS', level: 'EXTREME' },
-  'PRE_ECLAMPSIA': { label: 'Pre-Eklampsia Berat / Eklampsia', score: 12, category: 'MEDIS', level: 'EXTREME' },
-  'HEMORRHAGE': { label: 'Riwayat Perdarahan Hebat', score: 12, category: 'OBSTETRI', level: 'EXTREME' }
+export const RISK_FACTORS_MASTER: Record<string, {label: string, score: number, group: 'I' | 'II' | 'III', short: string}> = {
+  // --- KELOMPOK I: ADA POTENSI GAWAT OBSTETRI (APGO) ---
+  // Skor 4
+  'PR_TOO_YOUNG': { label: 'Terlalu Muda, Hamil I ≤ 16 Tahun', score: 4, group: 'I', short: 'Primi Muda' },
+  'PR_TOO_OLD': { label: 'Terlalu Tua, Hamil I ≥ 35 Tahun', score: 4, group: 'I', short: 'Primi Tua' },
+  'PR_SLOW': { label: 'Terlalu Lambat Hamil I, Kawin ≥ 4 Tahun', score: 4, group: 'I', short: 'Primi Tua Sekunder' },
+  'PR_LONG': { label: 'Terlalu Lama Hamil Lagi (≥ 10 Tahun)', score: 4, group: 'I', short: 'Anak Terkecil >10th' },
+  'PR_TOO_SOON': { label: 'Terlalu Cepat Hamil Lagi (≤ 2 Tahun)', score: 4, group: 'I', short: 'Anak Terkecil <2th' },
+  'PR_MANY_CHILDREN': { label: 'Terlalu Banyak Anak (≥ 4 Anak)', score: 4, group: 'I', short: 'Grande Multi' },
+  'PR_TOO_OLD_MULTI': { label: 'Terlalu Tua, Umur ≥ 35 Tahun', score: 4, group: 'I', short: 'Multi Tua' },
+  'PR_SHORT': { label: 'Terlalu Pendek (TB ≤ 145 cm)', score: 4, group: 'I', short: 'TB <145cm' },
+  'PR_HISTORY_FAIL': { label: 'Pernah Gagal Kehamilan/Keguguran', score: 4, group: 'I', short: 'Riw. Abortus' },
+  'PR_CS_HISTORY': { label: 'Pernah Melahirkan Tarikan Tang/Vakum', score: 4, group: 'I', short: 'Riw. Persalinan Sulit' }, // Di KSPR ini masuk Kel 1 kadang
+
+  // --- KELOMPOK II: ADA GAWAT OBSTETRI (AGO) ---
+  // Skor 4
+  'AGO_DISEASE': { label: 'Penyakit (Kurang Darah, Malaria, TBC, Payah Jantung, DM, PMS)', score: 4, group: 'II', short: 'Penyakit Ibu' },
+  'AGO_PRE_ECLAMPSIA': { label: 'Bengkak pada Muka/Tungkai, Tekanan Darah Tinggi', score: 4, group: 'II', short: 'Preeklamsia Ringan' },
+  'AGO_TWINS': { label: 'Hamil Kembar 2 atau Lebih', score: 4, group: 'II', short: 'Gemelli' },
+  'AGO_HYDRAMNIOS': { label: 'Hamil Kembar Air (Hidramnion)', score: 4, group: 'II', short: 'Hidramnion' },
+  'AGO_DEAD_BABY': { label: 'Bayi Mati dalam Kandungan', score: 4, group: 'II', short: 'IUFD' },
+  'AGO_OVERDUE': { label: 'Kehamilan Lebih Bulan (> 42 Minggu)', score: 4, group: 'II', short: 'Post Date' },
+  'AGO_BREECH': { label: 'Letak Sungsang', score: 4, group: 'II', short: 'Sungsang' },
+  'AGO_TRANSVERSE': { label: 'Letak Lintang', score: 4, group: 'II', short: 'Lintang' },
+  'AGO_HISTORY_CS': { label: 'Riwayat Sesar (SC) Sebelumnya', score: 4, group: 'II', short: 'Riw. SC' },
+
+  // --- KELOMPOK III: ADA GAWAT DARURAT OBSTETRI (AGDO) ---
+  // Skor 4 (Tapi Penanganan Khusus)
+  'AGDO_BLEEDING': { label: 'Perdarahan Dalam Kehamilan (APB)', score: 4, group: 'III', short: 'Perdarahan' },
+  'AGDO_ECLAMPSIA': { label: 'Kejang-Kejang (Eklampsia)', score: 4, group: 'III', short: 'Eklampsia' },
 };
 
 export const calculatePregnancyProgress = (hphtString: string) => {
@@ -42,10 +53,12 @@ export const calculatePregnancyProgress = (hphtString: string) => {
 };
 
 export const getRiskCategory = (scoreFromFactors: number, currentAncData?: any) => {
-  const baseScore = 2; // Skor awal ibu hamil (KRR)
+  // SKOR AWAL IBU HAMIL ADALAH 2
+  const baseScore = 2; 
   const total = scoreFromFactors + baseScore;
 
-  // 1. TRIASE HITAM (GAWAT DARURAT KLINIS)
+  // 1. TRIASE HITAM (GAWAT DARURAT KLINIS - LIVE)
+  // Ini mendeteksi kondisi tanda vital saat pemeriksaan fisik, terlepas dari skor screening
   if (currentAncData) {
     const bpStr = currentAncData.bloodPressure || "0/0";
     const bpParts = bpStr.split('/');
@@ -58,10 +71,11 @@ export const getRiskCategory = (scoreFromFactors: number, currentAncData?: any) 
       ['Perdarahan', 'Ketuban Pecah', 'Kejang', 'Pusing Hebat', 'Nyeri Perut Hebat'].includes(s)
     );
     
-    if ((sys >= 160 && sys < 500) || (dia >= 110 && dia < 500) || hasFatalSigns || currentAncData.fetalMovement === 'Tidak Ada' || djj < 120 || djj > 160) {
+    // Syok, Eklampsia, Gawat Janin
+    if ((sys >= 160 && sys < 500) || (dia >= 110 && dia < 500) || hasFatalSigns || currentAncData.fetalMovement === 'Tidak Ada' || (djj > 0 && (djj < 100 || djj > 180))) {
       return { 
         label: 'HITAM', 
-        desc: 'KRITIS / EMERGENCY - RUJUK SEGERA', 
+        desc: 'GAWAT DARURAT (Immediate Referral)', 
         color: 'text-white bg-slate-950 border-slate-900', 
         hex: '#020617',
         priority: 0
@@ -69,32 +83,34 @@ export const getRiskCategory = (scoreFromFactors: number, currentAncData?: any) 
     }
   }
 
-  // 2. KRST (MERAH) - Skor >= 12
+  // 2. KELOMPOK RISIKO BERDASARKAN SKOR PUJI ROCHJATI
+  
+  // KRST (KEHAMILAN RISIKO SANGAT TINGGI) - Skor >= 12
   if (total >= 12) {
     return { 
       label: 'MERAH', 
-      desc: 'Risiko Sangat Tinggi (KRST)', 
+      desc: 'RISIKO SANGAT TINGGI (KRST)', 
       color: 'text-white bg-red-600 border-red-700', 
       hex: '#dc2626',
       priority: 1
     };
   }
   
-  // 3. KRT (KUNING) - Skor 6 - 10
+  // KRT (KEHAMILAN RISIKO TINGGI) - Skor 6 - 10
   if (total >= 6) {
     return { 
       label: 'KUNING', 
-      desc: 'Risiko Tinggi (KRT)', 
+      desc: 'RISIKO TINGGI (KRT)', 
       color: 'text-yellow-900 bg-yellow-400 border-yellow-500', 
       hex: '#facc15',
       priority: 2
     };
   }
   
-  // 4. KRR (HIJAU) - Skor 2
+  // KRR (KEHAMILAN RISIKO RENDAH) - Skor 2
   return { 
     label: 'HIJAU', 
-    desc: 'Risiko Rendah (KRR)', 
+    desc: 'RISIKO RENDAH (KRR)', 
     color: 'text-white bg-emerald-500 border-emerald-600', 
     hex: '#10b981',
     priority: 3
