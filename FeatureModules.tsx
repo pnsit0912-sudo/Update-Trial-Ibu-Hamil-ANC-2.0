@@ -1,9 +1,243 @@
 
-import React, { useState, useMemo } from 'react';
-import { HeartPulse, Printer, Download, MapPin, Phone, Mail, UserX, AlertCircle, ShieldCheck, Share2, Filter, LayoutGrid, MessageSquare, Send, CheckCircle, Fingerprint, CalendarDays, Building2, UserCircle2, QrCode, Baby, Sparkles, Scale, Info, Crosshair, Save } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { HeartPulse, Printer, Download, MapPin, Phone, Mail, UserX, AlertCircle, ShieldCheck, Share2, Filter, LayoutGrid, MessageSquare, Send, CheckCircle, Fingerprint, CalendarDays, Building2, UserCircle2, QrCode, Baby, Sparkles, Scale, Info, Crosshair, Save, Clock, Play, Square, RefreshCcw, Loader2, MessageCircle } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { PUSKESMAS_INFO, EDUCATION_LIST } from './constants';
-import { User, AppState, EducationContent } from './types';
+import { User, AppState, EducationContent, UserRole } from './types';
+import { getRiskCategory } from './utils';
+
+// Modul WhatsApp Blast
+export const WhatsAppBlastModule = ({ state }: { state: AppState }) => {
+  const [template, setTemplate] = useState('Halo Ibu {nama}, kami dari Puskesmas Pasar Minggu mengingatkan jadwal pemeriksaan ANC Anda pada tanggal {next_visit}. Mohon kehadirannya ya Bu. Salam sehat!');
+  const [delay, setDelay] = useState(10); // Detik
+  const [riskFilter, setRiskFilter] = useState('ALL');
+  const [isBlasting, setIsBlasting] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(-1);
+  const [blastQueue, setBlastQueue] = useState<{user: User, status: 'PENDING' | 'SENDING' | 'SENT' | 'FAILED'}[]>([]);
+  const timerRef = useRef<number | null>(null);
+
+  const patients = useMemo(() => {
+    return state.users.filter(u => {
+      if (u.role !== UserRole.USER || u.isDelivered) return false;
+      if (riskFilter === 'ALL') return true;
+      const latest = state.ancVisits.filter(v => v.patientId === u.id).sort((a,b) => b.visitDate.localeCompare(a.visitDate))[0];
+      const risk = getRiskCategory(u.totalRiskScore, latest);
+      return risk.label === riskFilter;
+    });
+  }, [state.users, state.ancVisits, riskFilter]);
+
+  const prepareQueue = () => {
+    setBlastQueue(patients.map(u => ({ user: u, status: 'PENDING' })));
+    setCurrentIndex(-1);
+    setIsBlasting(false);
+  };
+
+  useEffect(() => {
+    prepareQueue();
+  }, [patients]);
+
+  const formatMessage = (user: User) => {
+    const latest = state.ancVisits.filter(v => v.patientId === user.id).sort((a,b) => b.visitDate.localeCompare(a.visitDate))[0];
+    return template
+      .replace(/{nama}/g, user.name)
+      .replace(/{id}/g, user.id)
+      .replace(/{next_visit}/g, latest?.nextVisitDate || '(Belum Terjadwal)');
+  };
+
+  const startBlast = () => {
+    if (blastQueue.length === 0) return;
+    setIsBlasting(true);
+    setCurrentIndex(0);
+  };
+
+  const stopBlast = () => {
+    setIsBlasting(false);
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+  };
+
+  useEffect(() => {
+    if (isBlasting && currentIndex >= 0 && currentIndex < blastQueue.length) {
+      const currentItem = blastQueue[currentIndex];
+      
+      if (currentItem.status === 'PENDING') {
+        // Update status ke SENDING
+        setBlastQueue(prev => prev.map((item, idx) => idx === currentIndex ? { ...item, status: 'SENDING' } : item));
+        
+        // Eksekusi pengiriman (via WhatsApp Web link)
+        const phone = currentItem.user.phone.replace(/\D/g, '').replace(/^0/, '62');
+        const message = encodeURIComponent(formatMessage(currentItem.user));
+        const url = `https://api.whatsapp.com/send?phone=${phone}&text=${message}`;
+        
+        window.open(url, '_blank');
+
+        // Tandai sebagai SENT setelah sedikit delay simulasi
+        setTimeout(() => {
+          setBlastQueue(prev => prev.map((item, idx) => idx === currentIndex ? { ...item, status: 'SENT' } : item));
+          
+          // Lanjut ke pesan berikutnya setelah Delay yang ditentukan user
+          if (currentIndex + 1 < blastQueue.length) {
+            timerRef.current = window.setTimeout(() => {
+              setCurrentIndex(prev => prev + 1);
+            }, delay * 1000);
+          } else {
+            setIsBlasting(false);
+            alert('WhatsApp Blast Selesai!');
+          }
+        }, 1000);
+      }
+    }
+  }, [isBlasting, currentIndex]);
+
+  return (
+    <div className="space-y-10 animate-in fade-in duration-700">
+      {/* Header & Filter */}
+      <div className="bg-white p-10 md:p-14 rounded-[3.5rem] shadow-sm border border-slate-100 flex flex-col xl:flex-row justify-between items-center gap-10">
+        <div className="flex items-center gap-6">
+          <div className="bg-emerald-600 p-5 rounded-3xl text-white shadow-xl shadow-emerald-100 rotate-3">
+            <Send size={32} />
+          </div>
+          <div>
+            <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">WhatsApp Blast Manager</h2>
+            <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mt-2">Kirim Pengingat Masal Tanpa Biaya</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-4 w-full xl:w-auto">
+          <div className="flex-1 min-w-[200px]">
+            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-4 block mb-2">Filter Risiko Pasien</label>
+            <div className="relative">
+              <select 
+                value={riskFilter} 
+                onChange={(e) => setRiskFilter(e.target.value)}
+                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl font-black text-[10px] uppercase appearance-none outline-none focus:ring-4 focus:ring-emerald-50 transition-all"
+              >
+                <option value="ALL">Semua Risiko</option>
+                <option value="HITAM">Kritis (Hitam)</option>
+                <option value="MERAH">Tinggi (Merah)</option>
+                <option value="KUNING">Sedang (Kuning)</option>
+                <option value="HIJAU">Rendah (Hijau)</option>
+              </select>
+              <Filter size={14} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+          <div className="flex-1 min-w-[150px]">
+            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-4 block mb-2">Delay Per Pesan (Detik)</label>
+            <div className="relative">
+              <input 
+                type="number" 
+                value={delay} 
+                onChange={(e) => setDelay(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl font-black text-xs outline-none focus:ring-4 focus:ring-emerald-50 transition-all"
+              />
+              <Clock size={14} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        {/* Pesan & Controls */}
+        <div className="lg:col-span-1 space-y-8">
+          <div className="bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100 space-y-6">
+            <h3 className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
+              <MessageSquare className="text-emerald-600" size={24} /> Template Pesan
+            </h3>
+            <textarea 
+              value={template}
+              onChange={(e) => setTemplate(e.target.value)}
+              className="w-full p-6 bg-slate-50 border-none rounded-[2rem] font-bold text-sm outline-none focus:ring-8 focus:ring-emerald-50 transition-all min-h-[200px]"
+              placeholder="Gunakan {nama}, {id}, {next_visit} untuk variabel otomatis..."
+            />
+            <div className="p-6 bg-emerald-50 rounded-2xl border border-emerald-100 space-y-2">
+              <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Variabel Tersedia:</p>
+              <div className="flex flex-wrap gap-2">
+                {['{nama}', '{id}', '{next_visit}'].map(v => <span key={v} className="px-2 py-1 bg-white text-[10px] font-bold rounded-lg border border-emerald-200">{v}</span>)}
+              </div>
+            </div>
+            
+            <div className="pt-6 space-y-4">
+               {!isBlasting ? (
+                 <button 
+                   onClick={startBlast}
+                   disabled={blastQueue.length === 0}
+                   className="w-full py-6 bg-emerald-600 text-white rounded-[2rem] font-black uppercase text-xs tracking-widest shadow-xl shadow-emerald-100 hover:scale-105 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                 >
+                   <Play size={18} /> Mulai WhatsApp Blast
+                 </button>
+               ) : (
+                 <button 
+                   onClick={stopBlast}
+                   className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black uppercase text-xs tracking-widest shadow-xl hover:bg-black transition-all flex items-center justify-center gap-3"
+                 >
+                   <Square size={18} /> Hentikan Antrian
+                 </button>
+               )}
+               <button onClick={prepareQueue} className="w-full py-4 bg-slate-50 text-slate-400 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest hover:text-emerald-600 transition-all">
+                 Reset Antrian
+               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Queue List */}
+        <div className="lg:col-span-2 space-y-8">
+           <div className="bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100">
+              <div className="flex justify-between items-center mb-10">
+                 <h3 className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
+                   <Loader2 className={`text-emerald-600 ${isBlasting ? 'animate-spin' : ''}`} size={24} /> Antrian Pengiriman ({blastQueue.length})
+                 </h3>
+                 {isBlasting && (
+                   <div className="px-5 py-2 bg-emerald-100 text-emerald-600 rounded-xl text-[10px] font-black uppercase animate-pulse">
+                     Sisa Waktu Tunggu: {currentIndex < blastQueue.length - 1 ? delay : 0}s
+                   </div>
+                 )}
+              </div>
+
+              <div className="space-y-4 max-h-[600px] overflow-y-auto no-scrollbar pr-2">
+                {blastQueue.length === 0 ? (
+                  <div className="py-24 text-center opacity-30">
+                    <MessageCircle size={64} className="mx-auto mb-4" />
+                    <p className="text-xl font-black uppercase tracking-widest">Tidak Ada Pasien Terpilih</p>
+                  </div>
+                ) : (
+                  blastQueue.map((item, idx) => (
+                    <div 
+                      key={item.user.id} 
+                      className={`p-6 rounded-[2.5rem] border-2 transition-all flex items-center justify-between gap-6 ${
+                        idx === currentIndex ? 'border-emerald-500 bg-emerald-50 shadow-lg scale-[1.02]' : 
+                        item.status === 'SENT' ? 'border-slate-50 bg-slate-50 opacity-60' : 'border-slate-100 bg-white'
+                      }`}
+                    >
+                      <div className="flex items-center gap-5 min-w-0">
+                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black ${item.status === 'SENT' ? 'bg-emerald-500 text-white' : 'bg-white border border-slate-200 text-slate-900 shadow-sm'}`}>
+                           {item.status === 'SENT' ? <CheckCircle size={20}/> : item.user.name.charAt(0)}
+                         </div>
+                         <div className="min-w-0">
+                            <p className="text-sm font-black text-slate-900 uppercase truncate">{item.user.name}</p>
+                            <p className="text-[10px] font-bold text-slate-400 mt-1">{item.user.phone}</p>
+                         </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-4 shrink-0">
+                        <div className={`px-4 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest ${
+                          item.status === 'SENT' ? 'bg-emerald-100 text-emerald-600' :
+                          item.status === 'SENDING' ? 'bg-blue-100 text-blue-600 animate-pulse' :
+                          'bg-slate-100 text-slate-400'
+                        }`}>
+                          {item.status}
+                        </div>
+                        {idx === currentIndex && isBlasting && <Loader2 size={16} className="text-emerald-600 animate-spin" />}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Modul Kartu ANC Pintar
 export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppState, setState: any, isUser: boolean, user: User }) => {
@@ -206,7 +440,6 @@ export const SmartCardModule = ({ state, setState, isUser, user }: { state: AppS
   );
 };
 
-// ... (Rest of EducationModule, ContactModule, AccessDenied remains same)
 export const EducationModule = () => {
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
 

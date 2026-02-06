@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { UserRole, User, EducationContent, ANCVisit } from './types';
-import { LayoutDashboard, Users, UserPlus, BookOpen, MapPin, QrCode, Phone, ShieldCheck, Map as MapIcon } from 'lucide-react';
+import { LayoutDashboard, Users, UserPlus, BookOpen, MapPin, QrCode, Phone, ShieldCheck, Map as MapIcon, Send } from 'lucide-react';
 
 export const PUSKESMAS_INFO = {
   name: "Puskesmas Pasar Minggu",
@@ -27,6 +27,7 @@ export const WILAYAH_DATA = {
 export const NAVIGATION = [
   { name: 'Dashboard', icon: <LayoutDashboard size={20} />, roles: [UserRole.ADMIN, UserRole.NAKES, UserRole.USER], path: 'dashboard' },
   { name: 'Data Pasien', icon: <Users size={20} />, roles: [UserRole.ADMIN, UserRole.NAKES], path: 'patients' },
+  { name: 'WhatsApp Blast', icon: <Send size={20} />, roles: [UserRole.ADMIN, UserRole.NAKES], path: 'whatsapp-blast' },
   { name: 'Monitoring Resiko', icon: <MapPin size={20} />, roles: [UserRole.ADMIN, UserRole.NAKES], path: 'monitoring' },
   { name: 'Pemetaan Lokasi', icon: <MapIcon size={20} />, roles: [UserRole.ADMIN, UserRole.NAKES], path: 'map' },
   { name: 'Pendaftaran ANC', icon: <UserPlus size={20} />, roles: [UserRole.ADMIN, UserRole.NAKES], path: 'register' },
